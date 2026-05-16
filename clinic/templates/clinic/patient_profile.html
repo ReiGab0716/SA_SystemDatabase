@@ -1,0 +1,261 @@
+{% extends base_template %}
+
+{% block content %}
+<div class="animate-fade-in main-container" style="display: flow-root;">
+    <div class="header-section mb-4">
+        <h2 class="title-text">My Profile</h2>
+        <p class="subtitle-text">Manage your personal information and account settings.</p>
+    </div>
+
+    <form method="POST" action="{% url 'patient_profile' %}" hx-post="{% url 'patient_profile' %}" hx-target="#main-display" hx-on::after-request="if(event.detail.successful) location.reload()" enctype="multipart/form-data" class="profile-card">
+        {% csrf_token %}
+        <div class="profile-grid">
+            <div class="form-section">
+                <h3 class="section-title"><i class="fas fa-user-circle me-2"></i>Personal Details</h3>
+                <div class="input-group-row">
+                    <div class="input-field">
+                        <label>First Name</label>
+                        <input type="text" name="first_name" value="{{ user.first_name }}" class="custom-input">
+                    </div>
+                    <div class="input-field">
+                        <label>Last Name</label>
+                        <input type="text" name="last_name" value="{{ user.last_name }}" class="custom-input">
+                    </div>
+                </div>
+
+                <div class="input-field">
+                    <label>Username</label>
+                    <input type="text" name="username" value="{{ user.username }}" class="custom-input">
+                </div>
+
+                <div class="input-field">
+                    <label>Email Address</label>
+                    <input type="email" name="email" value="{{ user.email }}" class="custom-input" placeholder="No Email">
+                </div>
+                <div class="input-field">
+                    <label>Phone Number</label>
+                    <input type="text" name="phone" value="{{ profile.phone_number }}" class="custom-input" placeholder="09XXXXXXXXX" pattern="09[0-9]{9}" maxlength="11">
+                </div>
+                <div class="input-field">
+                    <label>Profile Picture</label>
+                    <input type="file" name="profile_image" accept="image/*" class="custom-input">
+                </div>
+
+                <button type="submit" name="update_profile" class="save-btn mobile-action-btn">
+                    Save Changes
+                </button>
+            </div>
+
+           <div class="status-card">
+                <div class="avatar-circle">
+                    {% if profile.profile_image %}
+                        <img src="{{ profile.profile_image.url }}" alt="{{ user.get_full_name|default:user.username }}">
+                    {% else %}
+                        {{ user.first_name|first }}{{ user.last_name|first }}
+                    {% endif %}
+                </div>
+                <h4>{{ user.get_full_name }}</h4>
+                <p class="patient-id-badge">ID: {{ profile.display_id }}</p>
+                <span class="role-tag">{{ profile.role }}</span>
+                <hr>
+                <p class="member-since" style="margin-bottom: 5px;">
+                    <strong>{{ total_visits }}</strong> Total Session{{ total_visits|pluralize }}
+                </p>
+                <p class="member-since">Member since: {{ user.date_joined|date:"M Y" }}</p>
+
+                <button type="submit" name="update_profile" class="save-btn desktop-action-btn" style="margin-top: 15px;">
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <div class="profile-card mt-5">
+        <h3 class="section-title"><i class="fas fa-shield-alt me-2"></i>Account Security</h3>
+        <p class="subtitle-text mb-4">Ensure your account is using a strong password.</p>
+        
+        <form method="POST" action="{% url 'patient_profile' %}" hx-post="{% url 'patient_profile' %}" hx-target="#main-display" hx-on::after-request="if(event.detail.successful) location.reload()">
+            {% csrf_token %}
+            <div class="profile-grid">
+                <div class="form-section">
+                    {% for field in password_form %}
+                        <div class="input-field">
+                            <label>{{ field.label }}</label>
+                            <div class="password-field-wrap">
+                            <input type="{{ field.field.widget.input_type }}" 
+                                   name="{{ field.name }}" 
+                                   class="custom-input password-toggle-input" 
+                                   placeholder="Enter {{ field.label|lower }}">
+                            <button type="button" class="view-password-btn" onclick="togglePasswordVisibility(this)">View</button>
+                            </div>
+                            {% if field.errors %}
+                                <small class="error-text">{{ field.errors.0 }}</small>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                    <button type="submit" name="change_password" class="save-btn secondary-btn mobile-action-btn">Update Password</button>
+                </div>
+                
+                <div class="info-sidebar desktop-action-btn" style="display: flex; align-items: flex-end;">
+                    <button type="submit" name="change_password" class="save-btn secondary-btn">Update Password</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Handles profile password visibility without leaving the page.
+function togglePasswordVisibility(button) {
+    const input = button.closest('.password-field-wrap').querySelector('input');
+    const isPassword = input.type === 'password';
+    input.type = isPassword ? 'text' : 'password';
+    button.textContent = isPassword ? 'Hide' : 'View';
+}
+</script>
+
+<style>
+    .mt-5 { margin-top: 3rem; }
+
+    .main-container {
+        padding: 30px !important;
+        width: 100% !important;
+        max-width: 1200px !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+        display: flow-root; 
+    }
+
+    .profile-card {
+        background: white;
+        border-radius: 35px;
+        padding: 40px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.02);
+        border: 1px solid rgba(0,0,0,0.04);
+        margin-bottom: 30px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .profile-grid {
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        gap: 50px;
+    }
+
+    .input-group-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .custom-input {
+        width: 100%;
+        padding: 12px 18px;
+        border-radius: 12px;
+        border: 2px solid #f8f8f8;
+        background: #fcfcfc;
+        margin-top: 8px;
+        margin-bottom: 20px;
+        box-sizing: border-box; 
+    }
+
+    .custom-input.readonly { background: #f0f0f0; cursor: not-allowed; }
+
+    .password-field-wrap {
+        position: relative;
+    }
+
+    .password-field-wrap .custom-input {
+        padding-right: 78px;
+    }
+
+    .view-password-btn {
+        position: absolute;
+        right: 10px;
+        top: 18px;
+        border: none;
+        background: #fff0f7;
+        color: #FFC0CB;
+        border-radius: 8px;
+        padding: 7px 10px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .save-btn {
+        width: 100%;
+        background: #FFC0CB;
+        color: white;
+        border: none;
+        padding: 15px;
+        border-radius: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .save-btn:hover { background: #b06a96; transform: translateY(-2px); }
+    .secondary-btn { background: #444; }
+
+    /* Action Button Visibility */
+    .mobile-action-btn { display: none; }
+    .desktop-action-btn { display: block; }
+
+    /* MOBILE RESPONSIVE UPDATES */
+    @media (max-width: 992px) {
+        .profile-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .status-card {
+            order: 1; /* Keeps ID/Avatar at the top */
+            text-align: center;
+            border-bottom: 1px solid #f5f5f5;
+            padding-bottom: 20px;
+            margin-bottom: 10px;
+        }
+
+        .form-section {
+            order: 2; /* Form fields in middle */
+        }
+
+        /* Toggle Buttons */
+        .desktop-action-btn { display: none !important; }
+        .mobile-action-btn { 
+            display: block; 
+            margin-top: 10px; 
+        }
+
+        .input-group-row {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+
+        .profile-card { padding: 25px !important; }
+        .main-container { padding: 20px !important; }
+    }
+
+    .avatar-circle {
+        width: 80px; height: 80px;
+        background: #fff0f7;
+        color: #FFC0CB;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0 auto 15px;
+        overflow: hidden;
+    }
+
+    .avatar-circle img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+</style>
+{% endblock %}

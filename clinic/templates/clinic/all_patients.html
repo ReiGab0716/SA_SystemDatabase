@@ -1,0 +1,262 @@
+{% extends "clinic/base_staff.html" %}
+
+{% block content %}
+<div class="animate-fade-in main-container" style="display: flow-root;">
+    <div class="header-section mb-4">
+        <div class="header-grid">
+            <div class="title-group">
+                <h2 class="title-text">All Patients</h2>
+                <p class="subtitle-text">View all registered patients and their appointment history.</p>
+            </div>
+            <div class="counter-group">
+                <div class="session-counter" id="result-counter">
+                    {{ total_patients }} patient{{ total_patients|pluralize }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-container mb-5">
+        <form method="GET" action="{% url 'all_patients' %}" class="search-form">
+            <div class="search-wrapper">
+                <div class="input-group">
+                    <i class="fas fa-search search-icon"></i>
+                    <input 
+                        type="text" 
+                        name="search"
+                        value="{{ search_query }}"
+                        placeholder="Search by name, email, username, or #SA ID..."
+                        class="search-input"
+                    >
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="search-btn">Search</button>
+                    {% if search_query %}
+                        <a href="{% url 'all_patients' %}" class="clear-link">Clear</a>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Patients Grid -->
+    <div class="patients-grid">
+        {% for item in patients %}
+            <div class="patient-card">
+                <!-- Patient Info -->
+                <div class="patient-card-header">
+                    <div class="patient-name">
+                        {{ item.user.get_full_name|default:item.user.username }}
+                    </div>
+                    <div class="patient-id">Patient ID: #SA-{{ item.user.id|stringformat:"04d" }}</div>
+                </div>
+
+                <!-- Patient Details -->
+                <div class="patient-card-body">
+                    <div class="info-row">
+                        <span class="info-label">Username:</span>
+                        <span class="info-value">{{ item.user.username }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Email:</span>
+                        <span class="info-value">{{ item.user.email|default:"No Email" }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Phone:</span>
+                        <span class="info-value">
+                            {{ item.user.profile.phone_number|default:"No Phone" }}
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Member Since:</span>
+                        <span class="info-value">
+                            {{ item.user.date_joined|date:"M d, Y" }}
+                        </span>
+                    </div>
+
+                    <!-- Statistics -->
+                    <div class="patient-stats">
+                        <div class="stat-box">
+                            <div class="stat-number">{{ item.appointment_count }}</div>
+                            <div class="stat-label">Appointments</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number">₱{{ item.total_spent|floatformat:2 }}</div>
+                            <div class="stat-label">Total Spent</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <div class="patient-card-footer">
+                    <a href="{% url 'patient_detail' item.user.id %}" class="btn-view-details">
+                        View Details & History
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        {% empty %}
+            <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
+                <i class="fas fa-users" style="font-size: 3rem; color: #fceaea; margin-bottom: 15px;"></i>
+                <h3 style="color: #333;">No patients found</h3>
+                <p style="color: #999;">Try adjusting your search criteria</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    /* Layout & Grid */
+    .patients-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 20px;
+        margin-bottom: 40px;
+    }
+
+    /* Professional Search Bar */
+    .search-container {
+        max-width: 800px;
+        margin-bottom: 30px;
+    }
+
+    .search-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: white;
+        padding: 8px 12px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        border: 1px solid rgba(235, 91, 192, 0.15); /* Soft pink border */
+    }
+
+    .input-group {
+        display: flex;
+        align-items: center;
+        flex-grow: 1;
+        padding-left: 10px;
+    }
+
+    .search-icon {
+        color: #FFC0CB; /* Using your primary pink */
+        margin-right: 12px;
+    }
+
+    .search-input {
+        border: none !important;
+        outline: none !important;
+        width: 100%;
+        font-family: 'Poppins', sans-serif;
+        font-size: 0.95rem;
+        background: transparent;
+    }
+
+    .button-group {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .search-btn {
+        background: #FFC0CB;
+        color: white;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.3s ease;
+    }
+
+    .search-btn:hover {
+        background: #FFC0CB;
+        transform: translateY(-1px);
+    }
+
+    .clear-link {
+        color: #777;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        padding: 5px;
+    }
+
+    .clear-link:hover {
+        color: #FFC0CB;
+        text-decoration: underline;
+    }
+
+    /* Patient Cards */
+    .patient-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(235, 91, 192, 0.05);
+        transition: 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .patient-card:hover {
+        transform: translateY(-5px);
+        border-color: #FFC0CB;
+    }
+
+    .patient-name {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #333;
+    }
+
+    .patient-id {
+        font-size: 0.8rem;
+        color: #999;
+        font-family: monospace;
+        margin-top: 4px;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #f8f8f8;
+        font-size: 0.9rem;
+    }
+
+    .info-label { color: #aaa; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; }
+    .info-value { color: #444; font-weight: 500; }
+
+    .stat-box {
+        background: #fff0f7;
+        padding: 15px;
+        border-radius: 12px;
+        text-align: center;
+        flex: 1;
+    }
+
+    .stat-number { font-size: 1.4rem; font-weight: 700; color: #FFC0CB; }
+    .stat-label { font-size: 0.7rem; color: #999; text-transform: uppercase; }
+
+    .btn-view-details {
+        background: #FFC0CB;
+        color: white;
+        text-decoration: none;
+        display: block;
+        text-align: center;
+        padding: 12px;
+        border-radius: 10px;
+        font-weight: 600;
+        margin-top: 15px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .patients-grid { grid-template-columns: 1fr !important; }
+        .search-wrapper { flex-direction: column; gap: 15px; align-items: stretch; }
+        .button-group { justify-content: space-between; }
+    }
+</style>
+{% endblock %}

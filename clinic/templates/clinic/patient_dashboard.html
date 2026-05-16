@@ -1,0 +1,286 @@
+{% extends request.headers.HX_Request|yesno:"clinic/base_partial.html,clinic/base_patient.html" %}
+
+{% load static %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-pink: #FFC0CB;
+        --accent-purple: #6c5ce7;
+        --text-dark: #333333;
+        --text-gray: #666666;
+        --text-muted: #bbbbbb;
+    }
+
+    .content-fade {
+        animation: fadeInUp 0.4s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Top Bar */
+    .dashboard-top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 30px;
+    }
+
+    .dashboard-header h1 {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: var(--text-dark);
+        margin: 0;
+    }
+
+    .dashboard-header p {
+        color: var(--text-gray);
+        font-size: 0.95rem;
+        margin-top: 4px;
+    }
+
+    /* Patient ID Styling */
+    .user-info-corner {
+        text-align: right;
+    }
+
+    .user-full-name {
+        font-weight: 700;
+        color: var(--text-dark);
+        font-size: 1rem;
+    }
+
+    .patient-id-label {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        font-weight: 700;
+        margin-top: 2px;
+        letter-spacing: 0.5px;
+    }
+
+    .ref-id {
+        display: inline-block;
+        margin-top: 4px;
+        padding: 4px 8px;
+        border-radius: 6px;
+        border: 1px solid rgba(209, 130, 181, 0.35);
+        background: #fff0f7;
+        color: #7a265d;
+        font-family: 'Monaco', 'Consolas', monospace;
+        font-size: 0.82rem;
+        font-weight: 800;
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 30px;
+        border-radius: 30px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.02);
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover { transform: translateY(-5px); }
+
+    .stat-card small {
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        font-weight: 700;
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        display: block;
+        margin-bottom: 15px;
+    }
+
+    .stat-card h3 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--text-dark);
+    }
+
+    /* Greeting Card */
+    .greeting-container {
+        background: white;
+        border-radius: 35px;
+        padding: 45px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.02);
+        margin-bottom: 40px;
+    }
+
+    .greeting-container h2 {
+        font-size: 2.3rem;
+        font-weight: 800;
+        color: var(--text-dark);
+        margin: 0;
+    }
+
+    .highlight-name { color: var(--primary-pink); }
+
+    /* Table Section */
+    .activity-section {
+        background: white;
+        border-radius: 35px;
+        padding: 40px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.02);
+    }
+
+    .activity-section h3 {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: var(--text-dark);
+        margin: 0;
+    }
+
+    .activity-section p {
+        color: var(--text-gray);
+        font-size: 0.9rem;
+        margin: 8px 0 35px;
+    }
+
+    .custom-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .custom-table th {
+        text-align: left;
+        padding: 15px;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        font-weight: 700;
+        border-bottom: 2px solid #f8f9fa;
+    }
+
+    .custom-table td {
+        padding: 22px 15px;
+        border-bottom: 1px solid #fcfcfc;
+    }
+
+    /* Status Tags Styling */
+    .status-tag {
+        padding: 6px 14px;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        display: inline-block;
+        text-transform: uppercase;
+    }
+
+    .status-pending { 
+        background-color: #fff4e6; 
+        color: #f39c12; 
+    }  
+
+    .status-confirmed { 
+        background-color: #e6f7ee; 
+        color: #27ae60; 
+    } 
+
+    .status-completed {
+         background-color: #ebf5ff; 
+         color: #2980b9; 
+    } 
+
+    .status-cancelled { 
+        background-color: #fceaea; 
+        color: #e74c3c; 
+    } 
+
+</style>
+
+<div class="content-fade">
+    <div class="dashboard-top-bar">
+        <div class="dashboard-header">
+            <h1>Dashboard Overview</h1>
+            <p>Track your aesthetic progress</p>
+        </div>
+        <div class="user-info-corner">
+            <div class="user-full-name">
+                {{ request.user.get_full_name|default:request.user.username }}
+            </div>
+            <div class="patient-id-label">
+                ID: #SA-{{ request.user.id|stringformat:"04d" }}
+            </div>
+        </div>  
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card" style="border-top: 5px solid var(--primary-pink);">
+            <small>Session History</small>
+            <h3>{{ total_visits }} Total Visit{{ total_visits|pluralize }}</h3>
+        </div>
+        <div class="stat-card" style="border-top: 5px solid var(--accent-gold);">
+            <small>Upcoming Visit</small>
+            {% if next_appointment %}
+                <h3>{{ next_appointment.date|date:"M d" }} @ {{ next_appointment.time|time:"f A" }}</h3>
+                <p style="font-size: 0.8rem; color: var(--text-gray);">{{ next_appointment.service.name }}</p>
+            {% else %}
+                <h3>No Upcoming</h3>
+                <p style="font-size: 0.8rem; color: var(--text-gray);">Ready for a glow up?</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="greeting-container">
+        <h2>Hello, <span class="highlight-name">{{ request.user.first_name|default:"Reinniel Gabriel" }}!</span> ✨</h2>
+        <p style="color: var(--text-gray); margin-top: 15px; line-height: 1.6;">Ready for your next glow-up? Check your schedule below or set a new session.</p>
+    </div>
+
+    <div class="activity-section">
+        <h3>Recent Activity</h3>
+        <p>Review your latest treatments and their status.</p>
+
+        <div style="overflow-x: auto;">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Treatment Service</th>
+                        <th>Appointment Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for appt in appointments %}
+                    <tr>
+                        <td>
+                            <div style="font-weight: 700; color: var(--text-dark);">{{ appt.service.name }}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">
+                                Ref: <span class="ref-id">{% if appt.reference_number %}{{ appt.reference_number }}{% else %}TRN-{{ appt.id|stringformat:"06d" }}{% endif %}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="color: var(--text-dark); font-weight: 600;">{{ appt.date|date:"M d, Y" }}</div>
+                            <div style="color: var(--text-gray); font-size: 0.85rem;">{{ appt.time|time:"f A" }}</div>
+                        </td>
+                        <td>
+                            <span class="status-tag status-{{ appt.status|lower }}">
+                                {{ appt.status|upper }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" style="padding: 60px; text-align: center; color: var(--text-muted); font-style: italic;">
+                            You haven't scheduled any sessions yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

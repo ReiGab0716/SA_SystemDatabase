@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shields Aesthetics | Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    {% load static %}
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #fdf2f4 0%, #fae1e6 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-box {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(235, 91, 192, 0.1);
+            width: 350px;
+            text-align: center;
+            border: 1px solid rgba(255, 192, 203, 0.5);
+            transition: transform 0.3s ease;
+        }
+        .login-box:hover {
+            transform: translateY(-5px);
+        }
+        .logo {
+            width: 80px;
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #444;
+            font-weight: 600;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+        }
+        input {
+            width: 100%;
+            padding: 14px;
+            margin: 10px 0;
+            border: 1.5px solid #eee;
+            border-radius: 10px;
+            box-sizing: border-box;
+            background-color: #fafafa;
+            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        input:focus {
+            outline: none;
+            border-color: #FFC0CB;
+            background-color: #fff;
+            box-shadow: 0 0 8px rgba(235, 91, 192, 0.2);
+            transform: scale(1.02);
+            border-color: #FFC0CB;
+        }
+        .btn {
+            background: linear-gradient(to right, #FFC0CB, #ff99aa);
+            color: white;
+            border: none;
+            padding: 14px;
+            width: 100%;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            margin-top: 20px;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(235, 91, 192, 0.3);
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            background: linear-gradient(to right, #FFC0CB, #FFC0CB);
+            box-shadow: 0 6px 20px rgba(235, 91, 192, 0.4);
+        }
+        .footer-links {
+            margin-top: 20px;
+            font-size: 0.85rem;
+        }
+        .footer-links a {
+            color: #FFC0CB;
+            text-decoration: none;
+            font-weight: 600; 
+        }
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 2. Apply it to your main boxes */
+        .login-box, .register-box {
+            background: rgba(255, 255, 255, 0.7); /* More transparent */
+            backdrop-filter: blur(10px); /* This creates the frosted glass blur */
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            /* Keep your existing padding and radius */
+        }
+        /* 3. Make the button pulse slightly when the page loads to draw the eye */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        .btn {
+            animation: pulse 2s infinite ease-in-out;
+            animation-delay: 1s; /* Starts pulsing after the box finishes sliding in */
+        }
+
+        .error-alert {
+            background-color: #fff0f0;
+            color: #d63384; /* A deep pink/red */
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ffccd5;
+            margin-bottom: 15px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: sans-serif;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <img src="{% static 'images/shield_logo.png' %}" alt="Logo" class="logo">
+        
+        <h2>Welcome Back</h2>
+
+        {% if login_error %}
+            <div class="error-alert">
+                <span style="margin-right: 8px;">⚠️</span> {{ login_error }}
+            </div>
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit" class="btn">LOGIN</button>
+        </form>
+        
+        <div class="footer-links">
+            <p>Don't have an account? <a href="{% url 'register' %}">Register here</a></p>
+            
+            <p><a href="{% url 'home' %}">← Back to Homepage</a></p>
+        </div>
+    </div>
+
+    <script>
+    function togglePassword() {
+        // Django's UserCreationForm creates two password fields: id_password1 and id_password2
+        const pass1 = document.getElementById('id_password1');
+        const pass2 = document.getElementById('id_password2');
+        
+        // If the fields exist, toggle their type
+        if (pass1) pass1.type = pass1.type === "password" ? "text" : "password";
+        if (pass2) pass2.type = pass2.type === "password" ? "text" : "password";
+    }
+    </script>
+
+</body>
+</html>

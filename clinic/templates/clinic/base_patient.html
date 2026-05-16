@@ -1,0 +1,613 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{% static 'images/shield_logo.png' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'images/shield_logo.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'images/shield_logo.png' %}">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>{% block title %}Shields Aesthetics{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Gilda+Display&family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+    :root {
+        --primary-pink: #FFC0CB;
+        --sidebar-width: 280px;
+        --bg-light: #fdf2f4;
+        --text-dark: #333333;
+        --premium-shadow: 0 14px 35px rgba(235, 91, 192, 0.14);
+    }
+
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: var(--bg-light);
+        margin: 0;
+        display: flex;
+        min-height: 100vh;
+        color: #444;
+        overflow: auto !important;
+    }
+
+    /* --- STRICT VISIBILITY CONTROL --- */
+@media (min-width: 993px) {
+    #logout-mobile { display: none !important; }
+    #logout-desktop { display: flex !important; }
+
+    /* --- Sidebar Section (Desktop) --- */
+    .sidebar {
+        width: var(--sidebar-width);
+        min-width: var(--sidebar-width);
+        max-width: var(--sidebar-width);
+        left: 0 !important;
+        background: white;
+        border-right: 1px solid rgba(235, 91, 192, 0.1);
+        display: flex;
+        flex-direction: column;
+        padding: 30px 20px;
+        position: fixed;
+        height: 100vh;
+        z-index: 100;
+        box-sizing: border-box;
+        transition: all 0.3s ease;
+    }
+
+    #sidebar-overlay {
+        display: none !important; /* Always hide overlay on desktop */
+    }
+
+    /* UPDATED: Centered Logo and Text for Desktop */
+    .sidebar-logo { 
+        text-align: center; 
+        margin-bottom: 40px; 
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .sidebar-logo img { 
+        width: 60px; 
+        margin-bottom: 0; 
+    }
+    
+    .sidebar-logo h1 { 
+        font-family: 'Gilda Display', serif; 
+        font-size: 1.2rem; 
+        letter-spacing: 2px; 
+        margin: 0; 
+        text-transform: uppercase;
+    }
+
+    .logout-link {
+        color: #9f4444 !important;
+    }
+
+    .logout-link i {
+        color: #9f4444 !important;
+    }
+
+    .nav-menu {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex-grow: 1;
+        width: 100%;
+        min-height: 0;
+        overflow-y: auto;
+        padding-right: 4px;
+    }
+
+    .nav-menu::-webkit-scrollbar { width: 6px; }
+    .nav-menu::-webkit-scrollbar-thumb {
+        background: rgba(235, 91, 192, 0.22);
+        border-radius: 999px;
+    }
+
+    .nav-item {
+        display: flex;
+        align-items: center;
+        padding: 14px 20px;
+        text-decoration: none;
+        color: #777;
+        border-radius: 15px;
+        transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+        font-weight: 500;
+        width: 100%; 
+        box-sizing: border-box; 
+        border-right: 4px solid transparent; 
+    }
+
+    .nav-item.active, .nav-item:hover {
+        background: #fff0f7;
+        color: var(--primary-pink);
+        border-right: 4px solid var(--primary-pink);
+        font-weight: 700;
+        letter-spacing: -0.2px; 
+        box-shadow: var(--premium-shadow);
+    }
+
+    .nav-item i { margin-right: 15px; width: 20px; text-align: center; }
+
+    .sidebar-avatar {
+        width: 54px;
+        height: 54px;
+        border-radius: 50%;
+        overflow: hidden;
+        background: #fff0f7;
+        color: var(--primary-pink);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        border: 2px solid rgba(235, 91, 192, 0.18);
+    }
+
+    .sidebar-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .toast-stack {
+        position: fixed;
+        right: 24px;
+        top: 24px;
+        z-index: 3000;
+        display: grid;
+        gap: 10px;
+        max-width: min(380px, calc(100vw - 32px));
+    }
+
+    .app-toast {
+        background: rgba(255,255,255,0.96);
+        border-left: 4px solid var(--primary-pink);
+        border-radius: 12px;
+        padding: 13px 16px;
+        box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+        color: #333;
+        animation: toastIn 0.25s ease-out;
+    }
+
+    .app-toast.success { border-left-color: #27ae60; }
+    .app-toast.error, .app-toast.danger { border-left-color: #c0392b; }
+    .app-toast.warning { border-left-color: #f39c12; }
+
+    @keyframes toastIn {
+        from { opacity: 0; transform: translateY(-8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .main-content {
+        margin-left: var(--sidebar-width);
+        flex: 1;
+        padding: 40px 60px;
+        width: calc(100% - var(--sidebar-width));
+        box-sizing: border-box;
+        min-height: 100vh;
+    }
+}
+
+    /* --- MOBILE RESPONSIVENESS FIX --- */
+@media (max-width: 992px) {
+    #logout-mobile { display: flex !important; }
+    #logout-desktop { display: none !important; }
+
+    body { 
+        flex-direction: column; 
+        overflow-x: hidden; /* Prevents horizontal wiggle when sidebar is hidden */
+    }
+
+    .sidebar {
+        position: fixed;        
+        width: 280px;           
+        max-width: 280px;
+        height: 100vh;          
+        left: -280px;           /* Hidden off-screen to the left */
+        top: 0;
+        padding: 30px 20px;
+        background: white;
+        z-index: 1000;          
+        border-right: 1px solid rgba(235, 91, 192, 0.1);
+        border-bottom: none;
+        transition: left 0.3s ease; 
+        display: flex !important;
+        flex-direction: column !important;
+        box-shadow: 10px 0 30px rgba(0,0,0,0.1);
+        box-sizing: border-box; /* Ensures padding doesn't add to width */
+    }
+
+    .sidebar.active {
+        left: 0 !important; 
+    }
+
+    /* UPDATED: Centered Logo and Text for Mobile */
+    .sidebar-logo { 
+        margin-bottom: 30px; 
+        display: flex; 
+        flex-direction: column;
+        align-items: center; 
+        justify-content: center;
+        gap: 10px;
+        text-align: center;
+    }
+
+    .sidebar-logo img { 
+        width: 50px; 
+    }
+
+    .sidebar-logo h1 {
+        font-family: 'Gilda Display', serif;
+        font-size: 1.1rem;
+        letter-spacing: 2px;
+        margin: 0;
+        text-transform: uppercase;
+    }
+
+    .nav-menu {
+        display: flex;
+        flex-direction: column !important; 
+        flex-wrap: nowrap !important; 
+        overflow-y: auto; /* Allows menu to scroll if it's too long */
+        overflow-x: hidden !important;    
+        padding-bottom: 20px;
+        gap: 8px;
+    }
+    
+    .nav-menu::-webkit-scrollbar { display: none; }
+
+    .nav-item {
+        display: flex;
+        align-items: center;
+        width: 100% !important; 
+        padding: 14px 20px;
+        font-size: 0.95rem;
+        text-decoration: none;
+        color: #777;
+        border-radius: 15px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        box-sizing: border-box;
+        border-right: 4px solid transparent;
+    }
+
+    .nav-item i {
+        margin-right: 15px;
+        width: 20px;
+        text-align: center;
+        font-size: 1.1rem;
+    }
+
+    .nav-item.active {
+        background: #fff0f7;
+        color: var(--primary-pink);
+        border-right: 4px solid var(--primary-pink);
+        font-weight: 700;
+    }
+
+    .logout-section {
+        margin-top: auto;
+        padding-top: 10px;
+    }
+
+    .logout-link {
+        color: #9f4444 !important;
+    }
+
+    .logout-link i {
+        color: #9f4444 !important;
+    }
+
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 80px 20px 20px 20px; /* Top padding increased to make room for toggle button */
+        box-sizing: border-box;
+        min-height: 100vh;
+    }
+
+    /* Mobile Navigation Toggle Button */
+    .mobile-nav-toggle {
+        display: flex !important;
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        z-index: 1100; /* Higher than the sidebar and overlay */
+        background: var(--primary-pink);
+        color: white;
+        border: none;
+        width: 45px;
+        height: 45px;
+        border-radius: 12px;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        box-shadow: 0 4px 12px rgba(235, 91, 192, 0.3);
+        cursor: pointer;
+        transition: transform 0.2s ease;
+    }
+
+    .mobile-nav-toggle:active {
+        transform: scale(0.9);
+    }
+}
+
+    .flatpickr-calendar { border-radius: 20px !important; box-shadow: 0 10px 40px rgba(235, 91, 192, 0.15) !important; }
+    .flatpickr-day.selected { background: var(--primary-pink) !important; border-color: var(--primary-pink) !important; }
+    .app-modal-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 4000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.42);
+        backdrop-filter: blur(4px);
+    }
+    .app-modal-overlay.is-open {
+        display: flex;
+    }
+    .app-modal-card {
+        width: min(420px, 100%);
+        background: #fff;
+        border-radius: 18px;
+        padding: 28px;
+        box-shadow: 0 18px 50px rgba(0,0,0,0.18);
+        text-align: center;
+    }
+    .app-modal-card h3 {
+        margin: 0 0 10px;
+        color: #333;
+    }
+    .app-modal-card p {
+        margin: 0 0 22px;
+        color: #666;
+        line-height: 1.5;
+    }
+    .app-modal-button {
+        min-height: 42px;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 22px;
+        background: var(--primary-pink);
+        color: #fff;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    @media (max-width: 640px) {
+        .modal-card {
+            width: calc(100vw - 32px) !important;
+            max-height: calc(100vh - 32px);
+            overflow-y: auto;
+            border-radius: 16px !important;
+            padding: 24px !important;
+            box-sizing: border-box;
+        }
+
+        .modal-actions {
+            flex-direction: column;
+        }
+
+        .modal-actions button,
+        .action-btn,
+        .slot,
+        .save-btn {
+            min-height: 44px;
+        }
+
+        .flatpickr-calendar {
+            max-width: calc(100vw - 24px) !important;
+            font-size: 16px;
+        }
+
+        .flatpickr-day {
+            height: 42px !important;
+            line-height: 42px !important;
+        }
+    }
+
+    </style>
+</head>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<button class="mobile-nav-toggle" onclick="toggleSidebar()">
+    <i class="fas fa-bars"></i>
+</button>
+
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    <div class="toast-stack" id="toastStack">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="app-toast {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <div class="app-modal-overlay" id="appModal" aria-hidden="true">
+        <div class="app-modal-card" role="dialog" aria-modal="true" aria-labelledby="appModalTitle">
+            <h3 id="appModalTitle">Notice</h3>
+            <p id="appModalMessage"></p>
+            <button type="button" class="app-modal-button" onclick="closeAppModal()">OK</button>
+        </div>
+    </div>
+
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <img src="{% static 'images/shield_logo.png' %}" alt="Shields Aesthetics Logo">
+            <div class="sidebar-avatar">
+                {% if request.user.profile.profile_image %}
+                    <img src="{{ request.user.profile.profile_image.url }}" alt="{{ request.user.get_full_name|default:request.user.username }}">
+                {% else %}
+                    {{ request.user.first_name|first|default:request.user.username|first }}
+                {% endif %}
+            </div>
+            <h1>SHIELDS</h1>
+        </div>
+        
+        <nav class="nav-menu" id="sidebar-nav">
+            <a href="{% url 'home' %}" class="nav-item">
+                <i class="fas fa-arrow-left"></i> <span>Homepage</span>
+            </a>
+            <a href="{% url 'patient_dashboard' %}" 
+               hx-get="{% url 'patient_dashboard' %}" 
+               hx-target="#main-display" hx-push-url="true"
+               class="nav-item {% if request.resolver_match.url_name == 'patient_dashboard' %}active{% endif %}">
+                <i class="fas fa-columns"></i> <span>Overview</span>
+            </a>
+
+            <a href="{% url 'book_appointment' %}" 
+               hx-get="{% url 'book_appointment' %}" 
+               hx-target="#main-display" hx-push-url="true"
+               class="nav-item {% if request.resolver_match.url_name == 'book_appointment' %}active{% endif %}">
+                <i class="fas fa-plus-circle"></i> <span>New Appointment</span>
+            </a>
+
+            <a href="{% url 'patient_sessions' %}" 
+               hx-get="{% url 'patient_sessions' %}" 
+               hx-target="#main-display" hx-push-url="true" 
+               class="nav-item {% if request.resolver_match.url_name == 'patient_sessions' %}active{% endif %}">
+                <i class="fas fa-history"></i> <span>My Sessions</span>
+            </a>
+            
+            <a href="{% url 'patient_profile' %}" 
+               hx-get="{% url 'patient_profile' %}" 
+               hx-target="#main-display" hx-push-url="true" 
+               class="nav-item {% if request.resolver_match.url_name == 'patient_profile' %}active{% endif %}">
+                <i class="fas fa-user-circle"></i> <span>Profile</span>
+            </a>
+
+            <a href="{% url 'logout' %}" id="logout-mobile" class="nav-item logout-link">
+                <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+            </a>
+        </nav>
+
+        <div id="logout-desktop" class="logout-section">
+            <hr style="border: none; border-top: 1px solid rgba(235, 91, 192, 0.1); margin-bottom: 10px;">
+            <a href="{% url 'logout' %}" class="nav-item logout-link">
+                <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <div id="sidebar-overlay" onclick="toggleSidebar()" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:99;"></div>
+
+    <main class="main-content">
+        <div id="main-display" class="content-fade">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <script>
+        // --- Step 1: Flatpickr Init ---
+        function initAppointmentUI() {
+            const dateElement = document.getElementById('dateInput');
+            if (dateElement) {
+                if (dateElement._flatpickr) dateElement._flatpickr.destroy();
+                flatpickr("#dateInput", {
+                    altInput: true, altFormat: "F j, Y", dateFormat: "Y-m-d",
+                    minDate: "today", defaultDate: "today", disableMobile: "true",
+                    disable: [date => date.getDay() === 0],
+                    onChange: function(selectedDates, dateStr) {
+                        // If your booking logic needs to refresh on date change
+                        if(typeof refreshTimeSlots === "function") refreshTimeSlots(dateStr);
+                    }
+                });
+            }
+        }
+
+        function syncSidebarActive() {
+            const currentPath = window.location.pathname.replace(/\/$/, "") || "/";
+            document.querySelectorAll('.nav-item').forEach(item => {
+                const href = item.getAttribute('href');
+                if (href) {
+                    const normalizedHref = href.replace(/\/$/, "") || "/";
+                    const isMatch = normalizedHref !== "/" && currentPath === normalizedHref;
+                    item.classList.toggle('active', isMatch);
+                }
+            });
+        }
+
+        // --- Step 2: HTMX Navigation & Content Swapping ---
+        document.body.addEventListener('htmx:afterOnLoad', function(evt) {
+            syncSidebarActive();
+        });
+
+        // Re-lock booking slots after HTMX swaps patient pages.
+        document.body.addEventListener('htmx:afterSettle', function(evt) {
+            initAppointmentUI();
+
+            const bookingInterface = document.getElementById('booking-interface');
+            
+            if (bookingInterface) {
+                const dateInput = document.getElementById('dateInput');
+                const dateToLoad = dateInput ? dateInput.value : new Date().toISOString().split('T')[0];
+
+                if (typeof refreshTimeSlots === "function") {
+                    refreshTimeSlots(dateToLoad);
+                }
+            }
+        });
+
+        // Initial load call
+        document.addEventListener('DOMContentLoaded', function() {
+            initAppointmentUI();
+            syncSidebarActive();
+            document.querySelectorAll('.app-toast').forEach(toast => {
+                setTimeout(() => toast.remove(), 4500);
+            });
+        });
+
+        function showToast(message, type = 'success') {
+            const stack = document.getElementById('toastStack');
+            if (!stack) return;
+            const toast = document.createElement('div');
+            toast.className = `app-toast ${type}`;
+            toast.textContent = message;
+            stack.appendChild(toast);
+            setTimeout(() => toast.remove(), 4500);
+        }
+
+        function showAppModal(message, title = 'Notice') {
+            const modal = document.getElementById('appModal');
+            if (!modal) {
+                showToast(message, 'warning');
+                return;
+            }
+            document.getElementById('appModalTitle').textContent = title;
+            document.getElementById('appModalMessage').textContent = message;
+            modal.classList.add('is-open');
+            modal.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeAppModal() {
+            const modal = document.getElementById('appModal');
+            if (!modal) return;
+            modal.classList.remove('is-open');
+            modal.setAttribute('aria-hidden', 'true');
+        }
+
+        
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            // We just toggle a class instead of changing styles directly
+            sidebar.classList.toggle('active');
+            
+            // Show/Hide the overlay based on the class
+            if (sidebar.classList.contains('active')) {
+                overlay.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            } else {
+                overlay.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        }
+    </script>
+</body>
+</html>

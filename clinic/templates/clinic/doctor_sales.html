@@ -1,0 +1,233 @@
+{% extends "clinic/base_staff.html" %}
+{% block content %}
+
+<div class="sales-page">
+    <div class="header-section mb-4">
+        <h2 class="title-text">Sales Analytics</h2>
+        <p class="subtitle-text">Revenue, treatment performance, and service mix for completed appointments.</p>
+    </div>
+
+    <div class="sales-grid">
+        <div class="sales-tile pink">
+            <i class="fas fa-coins"></i>
+            <small>Total Revenue</small>
+            <h3>&#8369;{{ total_sales|default:0|floatformat:2 }}</h3>
+        </div>
+        <div class="sales-tile green">
+            <i class="fas fa-calendar-week"></i>
+            <small>Weekly Revenue</small>
+            <h3>&#8369;{{ weekly_sales|default:0|floatformat:2 }}</h3>
+        </div>
+        <div class="sales-tile blue">
+            <i class="fas fa-calendar-alt"></i>
+            <small>Monthly Revenue</small>
+            <h3>&#8369;{{ monthly_sales|default:0|floatformat:2 }}</h3>
+        </div>
+        <div class="sales-tile orange">
+            <i class="fas fa-sun"></i>
+            <small>Daily Revenue</small>
+            <h3>&#8369;{{ daily_sales|default:0|floatformat:2 }}</h3>
+        </div>
+        <div class="sales-tile slate">
+            <i class="fas fa-check-circle"></i>
+            <small>Completed Sessions</small>
+            <h3>{{ completed_count|default:0 }}</h3>
+        </div>
+    </div>
+
+    <div class="analytics-grid">
+        <section class="analytics-panel">
+            <h3>Revenue Trend</h3>
+            <canvas id="revenueTrendChart" height="120"></canvas>
+        </section>
+        <section class="analytics-panel">
+            <h3>Service Popularity</h3>
+            <canvas id="servicePopularityChart" height="120"></canvas>
+        </section>
+    </div>
+
+    <div class="analytics-grid">
+        <section class="analytics-panel">
+            <h3>Service Rendered Breakdown</h3>
+            <div class="metric-list">
+                {% for item in service_breakdown %}
+                    <div class="metric-row">
+                        <span>{{ item.service__name|default:"Unknown Service" }}</span>
+                        <strong>{{ item.count }} session{{ item.count|pluralize }} · &#8369;{{ item.total|default:0|floatformat:2 }}</strong>
+                    </div>
+                {% empty %}
+                    <p class="empty-note">No completed services yet.</p>
+                {% endfor %}
+            </div>
+        </section>
+        <section class="analytics-panel">
+            <h3>Top-performing Treatments</h3>
+            <div class="metric-list ranked">
+                {% for item in top_treatments %}
+                    <div class="metric-row">
+                        <span>#{{ forloop.counter }} {{ item.service__name|default:"Unknown Service" }}</span>
+                        <strong>&#8369;{{ item.total|default:0|floatformat:2 }}</strong>
+                    </div>
+                {% empty %}
+                    <p class="empty-note">No completed treatments yet.</p>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const trendLabels = {{ trend_labels|safe }};
+const trendValues = {{ trend_values|safe }};
+const popularityLabels = {{ popularity_labels|safe }};
+const popularityValues = {{ popularity_values|safe }};
+
+new Chart(document.getElementById('revenueTrendChart'), {
+    type: 'line',
+    data: {
+        labels: trendLabels,
+        datasets: [{
+            label: 'Revenue',
+            data: trendValues,
+            borderColor: '#FFC0CB',
+            backgroundColor: 'rgba(209, 130, 181, 0.12)',
+            fill: true,
+            tension: 0.35
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } }
+    }
+});
+
+new Chart(document.getElementById('servicePopularityChart'), {
+    type: 'pie',
+    data: {
+        labels: popularityLabels,
+        datasets: [{
+            data: popularityValues,
+            backgroundColor: ['#FFC0CB', '#2e8b57', '#2980b9', '#f39c12', '#8e44ad', '#16a085', '#c0392b', '#7f8c8d']
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom' } }
+    }
+});
+</script>
+
+<style>
+.sales-page {
+    padding: 30px;
+}
+
+.sales-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 14px;
+    margin: 20px 0;
+}
+
+.sales-tile {
+    background: white;
+    border-radius: 12px;
+    padding: 18px;
+    text-align: center;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.sales-tile i {
+    font-size: 1.35rem;
+}
+
+.sales-tile small {
+    font-size: 0.72rem;
+    color: #777;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.sales-tile h3 {
+    margin: 0;
+    font-size: 1.18rem;
+    font-weight: 700;
+}
+
+.sales-tile.pink { border-top: 4px solid #FFC0CB; color:#FFC0CB; }
+.sales-tile.green { border-top: 4px solid #2e8b57; color:#2e8b57; }
+.sales-tile.blue { border-top: 4px solid #2980b9; color:#2980b9; }
+.sales-tile.orange { border-top: 4px solid #f39c12; color:#f39c12; }
+.sales-tile.slate { border-top: 4px solid #555; color:#555; }
+
+.analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 18px;
+    margin-top: 18px;
+}
+
+.analytics-panel {
+    background: white;
+    border-radius: 12px;
+    padding: 22px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+}
+
+.analytics-panel h3 {
+    margin: 0 0 16px;
+    color: #333;
+    font-size: 1rem;
+}
+
+.metric-list {
+    display: grid;
+    gap: 10px;
+}
+
+.metric-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 11px 0;
+    border-bottom: 1px solid #f1f1f1;
+    color: #333;
+}
+
+.metric-row strong {
+    color: #FFC0CB;
+    text-align: right;
+}
+
+.empty-note {
+    color: #777;
+    margin: 0;
+}
+
+@media (max-width: 700px) {
+    .sales-page {
+        padding: 20px;
+    }
+
+    .analytics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .metric-row {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .metric-row strong {
+        text-align: left;
+    }
+}
+</style>
+
+{% endblock %}
