@@ -161,10 +161,18 @@ class ClinicFlowIntegrityTests(TestCase):
         home_response = self.client.get(reverse("home"))
         self.assertContains(home_response, 'id="contact"')
         self.assertContains(home_response, "Set Appointment")
+        self.assertContains(
+            home_response,
+            'href="#contact" class="btn-appointment">Set Appointment',
+            count=2,
+        )
         self.assertContains(home_response, "Consultation")
         self.assertContains(home_response, 'data-category="DOCTOR"')
 
         self.client.login(username="patient1", password="pass12345")
+        patient_home_response = self.client.get(reverse("home"))
+        self.assertContains(patient_home_response, f'href="{reverse("book_appointment")}"', count=2)
+
         booking_response = self.client.post(reverse("book_appointment"), {
             "service_id": self.service.id,
             "date": self.next_open_day().isoformat(),
@@ -176,6 +184,15 @@ class ClinicFlowIntegrityTests(TestCase):
 
         dashboard_response = self.client.get(reverse("patient_dashboard"))
         self.assertContains(dashboard_response, "TRN-")
+
+    def test_homepage_set_appointment_links_follow_staff_roles(self):
+        self.client.login(username="doctor1", password="pass12345")
+        doctor_response = self.client.get(reverse("home"))
+        self.assertContains(doctor_response, f'href="{reverse("schedule_appointment")}"', count=2)
+
+        self.client.login(username="secretary1", password="pass12345")
+        secretary_response = self.client.get(reverse("home"))
+        self.assertContains(secretary_response, f'href="{reverse("schedule_appointment")}"', count=2)
 
     def test_secretary_flow_reaches_manual_registration_dashboard_and_sessions(self):
         self.client.login(username="secretary1", password="pass12345")

@@ -333,7 +333,7 @@
         <h4>Welcome to Shields Aesthetics</h4>
         <h1>Experience the Best <span>Beauty Services</span></h1>
         <div class="hero-btns">
-            <a href="#contact" class="btn-appointment">Set Appointment</a>
+            <a href="{{ appointment_target|default:'#contact' }}" class="btn-appointment">Set Appointment</a>
             <a href="#services" class="btn-outline">Our Services</a>
         </div>
     </div>

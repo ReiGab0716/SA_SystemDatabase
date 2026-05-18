@@ -354,7 +354,7 @@
             </div>
         </nav>
 
-        <a href="#contact" class="btn-appointment">Set Appointment</a>
+        <a href="{{ appointment_target|default:'#contact' }}" class="btn-appointment">Set Appointment</a>
     </header>
 
     {% block content %}

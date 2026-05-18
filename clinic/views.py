@@ -86,6 +86,19 @@ def staff_dashboard_route(user):
         "PATIENT": "patient_dashboard",
     }.get(role, "home")
 
+
+def homepage_appointment_target(user):
+    if not user.is_authenticated:
+        return "#contact"
+
+    role = getattr(getattr(user, "profile", None), "role", None)
+    if role == "PATIENT":
+        return reverse("book_appointment")
+    if role in ["DOCTOR", "SECRETARY"]:
+        return reverse("schedule_appointment")
+    return "#contact"
+
+
 def normalized_no_email(email):
     return email if email else "No Email"
 
@@ -134,7 +147,10 @@ def identity_conflict_error(first_name, last_name, email, phone, exclude_user_id
 
 def home(request):
     all_services = Service.objects.all()
-    return render(request, 'clinic/home.html', {'services': all_services})
+    return render(request, 'clinic/home.html', {
+        'services': all_services,
+        'appointment_target': homepage_appointment_target(request.user),
+    })
 
 def login_view(request):
     if request.method == "POST":
