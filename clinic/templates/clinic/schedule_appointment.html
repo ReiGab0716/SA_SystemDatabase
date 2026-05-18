@@ -376,6 +376,13 @@ function formatPrice(price) {
     return numericPrice > 0 ? `₱${numericPrice.toLocaleString()}` : 'Price depends on consultation';
 }
 
+function scrollToSelectedPatient() {
+    const selectedBox = document.getElementById('selectedPatientBox');
+    if (selectedBox) {
+        selectedBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
 function getLocalDateString(date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -399,6 +406,7 @@ function selectPatient(id, name, email, phone, username = '', temporaryPassword 
     document.getElementById('selectedPatientPhone').textContent = state.patientPhone || 'N/A';
     document.getElementById('selectedPatientEmail').textContent = state.patientEmail || 'No Email';
     document.getElementById('nextFromStep1').disabled = false;
+    scrollToSelectedPatient();
 }
 
 function clearSelection() {
@@ -570,6 +578,7 @@ function goToStep(step) {
     document.querySelectorAll('.progress-step').forEach(item => item.classList.remove('active'));
     document.getElementById(`panel-${step}`).classList.add('active');
     document.getElementById(`step-${step}`).classList.add('active');
+    document.getElementById(`panel-${step}`).scrollIntoView({ behavior: 'smooth', block: 'start' });
 
     if (step === 3) {
         updateConfirmation();

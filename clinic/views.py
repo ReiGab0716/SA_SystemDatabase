@@ -889,6 +889,7 @@ def get_patient_details(request, patient_id):
             'last_name': patient.last_name,
             'email': normalized_no_email(patient.email),
             'phone_number': profile.phone_number or 'No Phone',
+            'profile_image_url': profile.profile_image.url if profile.profile_image else '',
             'total_appointments': appointment_count,
             'total_spent': float(total_spent),
             'date_joined': patient.date_joined.strftime('%Y-%m-%d'),
@@ -1252,5 +1253,6 @@ def get_service_details(request, service_id):
         'category': service.category,
         'price': float(service.price),
         'description': service.description,
+        'image_url': service.image.url if service.image else '',
         'estimated_duration': 60
     })

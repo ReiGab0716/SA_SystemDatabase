@@ -266,6 +266,15 @@
         animation: modalFadeIn 0.4s ease;
     }
 
+    .modal-service-image {
+        display: none;
+        width: 100%;
+        height: 240px;
+        object-fit: cover;
+        border-radius: 18px;
+        margin-bottom: 24px;
+    }
+
     @keyframes modalFadeIn {
         from { transform: translateY(30px); opacity: 0; }
         to { transform: translateY(0); opacity: 1; }
@@ -371,8 +380,13 @@ We empower our clients through expert care and the latest in regenerative medici
                 data-name="{{ service.name|escape }}"
                 data-price="{{ service.price }}"
                 data-description="{{ service.description|default:'Service details are available upon consultation.'|escape }}"
+                data-image="{% if service.image %}{{ service.image.url }}{% endif %}"
                 onclick="openServiceModalFromCard(this)"
-                style="--bg-url: url('{% static 'images/SERVICES_BG/' %}{{ service.name|lower|cut:' ' }}.jpg'), url('{% static 'images/SERVICES_BG/bgphoto.jpg' %}');">
+                {% if service.image %}
+                style="--bg-url: url('{{ service.image.url }}');"
+                {% else %}
+                style="--bg-url: url('{% static 'images/SERVICES_BG/' %}{{ service.name|lower|cut:' ' }}.jpg'), url('{% static 'images/SERVICES_BG/bgphoto.jpg' %}');"
+                {% endif %}>
                 
                 <div class="card-content">
                     <h3>{{ service.name }}</h3>
@@ -405,6 +419,7 @@ We empower our clients through expert care and the latest in regenerative medici
 <div id="serviceModal" class="modal-overlay" onclick="closeModal()">
     <div class="modal-content" onclick="event.stopPropagation()">
         <span onclick="closeModal()" style="position: absolute; top: 20px; right: 25px; font-size: 2rem; cursor: pointer; color: #999;">&times;</span>
+        <img id="modalServiceImage" class="modal-service-image" src="" alt="">
         <h2 id="modalTitle" style="font-family: 'Playfair Display', serif; color: var(--dark-text); margin-bottom: 10px;"></h2>
         <h4 id="modalPrice" style="color: var(--primary-pink); margin-bottom: 20px;"></h4>
         <p id="modalDesc" style="color: #666; line-height: 1.8; margin-bottom: 30px;"></p>
@@ -498,18 +513,28 @@ We empower our clients through expert care and the latest in regenerative medici
         wrapper.scrollBy({ left: direction * (wrapper.offsetWidth / 2), behavior: 'smooth' });
     }
 
-    function openServiceModal(name, price, desc) {
+    function openServiceModal(name, price, desc, imageUrl = '') {
+        const modalImage = document.getElementById('modalServiceImage');
         document.getElementById('modalTitle').innerText = name;
         const numericPrice = parseFloat(price || 0);
         document.getElementById('modalPrice').innerText = numericPrice > 0 ? "PHP " + numericPrice.toFixed(2) : "Price depends on consultation";
         document.getElementById('modalDesc').innerText = desc || 'Service details are available upon consultation.';
+        if (imageUrl) {
+            modalImage.src = imageUrl;
+            modalImage.alt = name;
+            modalImage.style.display = 'block';
+        } else {
+            modalImage.removeAttribute('src');
+            modalImage.alt = '';
+            modalImage.style.display = 'none';
+        }
         document.getElementById('serviceModal').style.display = 'flex';
         document.body.style.overflow = 'hidden';
     }
 
     function openServiceModalFromCard(card) {
         if (!card) return;
-        openServiceModal(card.dataset.name, card.dataset.price, card.dataset.description);
+        openServiceModal(card.dataset.name, card.dataset.price, card.dataset.description, card.dataset.image || '');
     }
 
     function scrollToContact() {

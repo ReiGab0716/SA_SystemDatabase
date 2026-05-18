@@ -24,6 +24,7 @@ class Service(models.Model):
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='FACIAL')
     description = models.TextField(blank=True, null=True) 
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    image = models.ImageField(upload_to='service_images/', blank=True, null=True)
 
     class Meta:
         db_table = 'services'

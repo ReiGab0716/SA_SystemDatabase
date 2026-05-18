@@ -423,15 +423,26 @@ function closePatientModal() {
 function displayPatientInfo(data) {
     // Transform the raw integer ID into the branded format: #SA-0005
     const brandedId = `#SA-${data.patient_id.toString().padStart(4, '0')}`;
+    const fullName = `${data.first_name || ''} ${data.last_name || ''}`.trim() || data.username;
+    const photoHtml = data.profile_image_url
+        ? `<img src="${data.profile_image_url}" alt="${fullName}" class="patient-photo">`
+        : `<div class="patient-photo placeholder"><i class="fas fa-user"></i></div>`;
 
     const html = `
+        <div class="patient-photo-card">
+            ${photoHtml}
+            <div>
+                <span class="info-label">Patient Photo</span>
+                <span class="info-value">${fullName}</span>
+            </div>
+        </div>
         <div class="info-item">
             <span class="info-label">Patient ID</span>
             <span class="info-value" style="font-weight: bold;">${brandedId}</span>
         </div>
         <div class="info-item">
             <span class="info-label">Name</span>
-            <span class="info-value">${data.first_name} ${data.last_name}</span>
+            <span class="info-value">${fullName}</span>
         </div>
         <div class="info-item">
             <span class="info-label">Username</span>
@@ -942,6 +953,36 @@ document.addEventListener('click', function(e) {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 20px;
+    }
+
+    .patient-photo-card {
+        grid-column: 1 / -1;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px;
+        background: #fff7fb;
+        border: 1px solid rgba(209, 130, 181, 0.2);
+        border-radius: 14px;
+    }
+
+    .patient-photo {
+        width: 88px;
+        height: 88px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #fff;
+        box-shadow: 0 8px 20px rgba(209, 130, 181, 0.22);
+        flex: 0 0 auto;
+    }
+
+    .patient-photo.placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f1f1f1;
+        color: #aaa;
+        font-size: 2rem;
     }
 
     .info-item {
