@@ -1,0 +1,1301 @@
+{% extends "clinic/base_staff.html" %}
+{% load static %}
+
+{% block content %}
+<div class="schedule-container">
+    <div class="progress-tracker">
+        <div class="progress-step active" id="step-1">
+            <div class="step-number">1</div>
+            <div class="step-label">Patient</div>
+        </div>
+        <div class="progress-step" id="step-2">
+            <div class="step-number">2</div>
+            <div class="step-label">Appointment</div>
+        </div>
+        <div class="progress-step" id="step-3">
+            <div class="step-number">3</div>
+            <div class="step-label">Confirm</div>
+        </div>
+    </div>
+
+    <div class="schedule-content">
+        <div class="step-panel active" id="panel-1">
+            <h2>Step 1: Identify Patient</h2>
+
+            <div class="search-section">
+                <label for="patientSearch">Search for Existing Patient</label>
+                <div class="search-input-group">
+                    <input type="text" id="patientSearch" placeholder="Search by name, email, phone, or ID..." autocomplete="off">
+                    <div id="searchResults" class="search-results"></div>
+                </div>
+            </div>
+
+            <div class="divider">OR</div>
+
+            <div class="quick-register-section">
+                <h3>Quick Register New Patient</h3>
+                <form id="quickRegisterForm">
+                    <div class="form-group">
+                        <label for="registerName">Full Name *</label>
+                        <input type="text" id="registerName" required placeholder="e.g., John Doe">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPhone">Phone Number *</label>
+                        <input type="tel" id="registerPhone" required placeholder="09XXXXXXXXX" pattern="09[0-9]{9}" maxlength="11">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerEmail">Email (Optional)</label>
+                        <input type="email" id="registerEmail" placeholder="e.g., john@email.com">
+                    </div>
+                    <button type="button" class="btn-register" onclick="quickRegisterPatient()">Register & Select Patient</button>
+                </form>
+            </div>
+
+            <div id="selectedPatientBox" class="selected-patient-box" style="display:none;">
+                <h3>Selected Patient</h3>
+                <div class="info-row">
+                    <span class="label">Name:</span>
+                    <span class="value" id="selectedPatientName"></span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Patient ID:</span>
+                    <span class="value" id="selectedPatientId"></span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Phone:</span>
+                    <span class="value" id="selectedPatientPhone"></span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Email:</span>
+                    <span class="value" id="selectedPatientEmail"></span>
+                </div>
+                <button type="button" class="btn-change" onclick="clearSelection()">Change Patient</button>
+            </div>
+
+            <div class="step-actions">
+                <button type="button" class="btn-next" id="nextFromStep1" disabled onclick="goToStep(2)">
+                    Next: Select Appointment
+                </button>
+            </div>
+        </div>
+
+        <div class="step-panel" id="panel-2">
+            <h2>Step 2: Select Treatment & Schedule</h2>
+
+            <div class="service-selection">
+                <label>Choose a Treatment *</label>
+                <div class="service-tabs">
+                    <button type="button" class="tab-btn active" onclick="filterServices('all', this)">All</button>
+                    <button type="button" class="tab-btn" onclick="filterServices('FACIAL', this)">Facial</button>
+                    <button type="button" class="tab-btn" onclick="filterServices('ZO', this)">ZO Professional</button>
+                    <button type="button" class="tab-btn" onclick="filterServices('DOCTOR', this)">Doctors Procedure</button>
+                    <button type="button" class="tab-btn" onclick="filterServices('LASER', this)">Laser Gynecology</button>
+                </div>
+
+                <div id="servicesList" class="services-grid">
+                    {% for service in facial_services %}
+                    <button type="button" class="service-card" data-service-id="{{ service.id }}" data-category="FACIAL" onclick="selectService(this)">
+                        <span class="category-label">Facial Treatments</span>
+                        <strong>{{ service.name }}</strong>
+                        <span class="description">{{ service.description|default:"" }}</span>
+                        <span class="service-meta">
+                            {% if service.price > 0 %}₱{{ service.price|floatformat:0 }}{% else %}Price depends on consultation{% endif %}
+                        </span>
+                    </button>
+                    {% endfor %}
+
+                    {% for service in zo_services %}
+                    <button type="button" class="service-card" data-service-id="{{ service.id }}" data-category="ZO" onclick="selectService(this)">
+                        <span class="category-label">ZO Professional Facial</span>
+                        <strong>{{ service.name }}</strong>
+                        <span class="description">{{ service.description|default:"" }}</span>
+                        <span class="service-meta">
+                            {% if service.price > 0 %}₱{{ service.price|floatformat:0 }}{% else %}Price depends on consultation{% endif %}
+                        </span>
+                    </button>
+                    {% endfor %}
+
+                    {% for service in doctor_services %}
+                    <button type="button" class="service-card" data-service-id="{{ service.id }}" data-category="DOCTOR" onclick="selectService(this)">
+                        <span class="category-label">Doctors Procedure</span>
+                        <strong>{{ service.name }}</strong>
+                        <span class="description">{{ service.description|default:"" }}</span>
+                        <span class="service-meta">
+                            {% if service.price > 0 %}₱{{ service.price|floatformat:0 }}{% else %}Price depends on consultation{% endif %}
+                        </span>
+                    </button>
+                    {% endfor %}
+
+                    {% for service in laser_services %}
+                    <button type="button" class="service-card" data-service-id="{{ service.id }}" data-category="LASER" onclick="selectService(this)">
+                        <span class="category-label">Laser Gynecology</span>
+                        <strong>{{ service.name }}</strong>
+                        <span class="description">{{ service.description|default:"" }}</span>
+                        <span class="service-meta">
+                            {% if service.price > 0 %}₱{{ service.price|floatformat:0 }}{% else %}Price depends on consultation{% endif %}
+                        </span>
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div id="selectedServiceBox" class="selected-service-box" style="display:none;">
+                <h3>Selected Treatment</h3>
+                <div class="info-row">
+                    <span class="label">Treatment:</span>
+                    <span class="value" id="selectedServiceName"></span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Price:</span>
+                    <span class="value" id="selectedServicePrice"></span>
+                </div>
+            </div>
+
+            <div class="addons-section">
+                <label>Add-on Services (Optional)</label>
+                <div class="addons-list">
+                    {% for addon in addon_services %}
+                    <button type="button" class="addon-card" data-id="{{ addon.id }}" data-name="{{ addon.name }}" data-price="{{ addon.price }}" onclick="toggleAddon(this)">
+                        <span>
+                            <strong>{{ addon.name }}</strong>
+                            <small>Add this to the treatment</small>
+                        </span>
+                        <span class="addon-price">+ ₱{{ addon.price|floatformat:0 }}</span>
+                    </button>
+                    {% empty %}
+                    <p class="muted-text">No add-ons available at this time.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="address-banner" id="addressBanner" style="display:none;">
+                <div>
+                    <div class="address-tag" id="bannerClinicTag">Clinic Location</div>
+                    <div class="address-name" id="bannerClinicName"></div>
+                    <div class="address-text" id="bannerAddress"></div>
+                </div>
+            </div>
+
+            <div class="datetime-selection">
+                <div class="form-group">
+                    <label for="appointmentDate">Preferred Date *</label>
+                    <input type="date" id="appointmentDate" required>
+                </div>
+            </div>
+
+            <label class="field-label">Available Time Slots *</label>
+            <div id="fullyBookedMessage" class="fully-booked-message" style="display:none;">
+                This day is fully booked. Please try another date.
+            </div>
+            <div class="time-slots">
+                <button type="button" class="slot" onclick="selectSlot(this)" data-value="09:00:00">9:00 AM</button>
+                <button type="button" class="slot" onclick="selectSlot(this)" data-value="09:30:00">9:30 AM</button>
+                <button type="button" class="slot" onclick="selectSlot(this)" data-value="10:00:00">10:00 AM</button>
+                <button type="button" class="slot" onclick="selectSlot(this)" data-value="10:30:00">10:30 AM</button>
+                <button type="button" class="slot" onclick="selectSlot(this)" data-value="11:00:00">11:00 AM</button>
+                <button type="button" class="slot" onclick="selectSlot(this)" data-value="11:30:00">11:30 AM</button>
+                <button type="button" class="slot" onclick="selectSlot(this)" data-value="13:00:00">1:00 PM</button>
+                <button type="button" class="slot" onclick="selectSlot(this)" data-value="13:30:00">1:30 PM</button>
+                <button type="button" class="slot" onclick="selectSlot(this)" data-value="14:00:00">2:00 PM</button>
+                <button type="button" class="slot" onclick="selectSlot(this)" data-value="14:30:00">2:30 PM</button>
+                <button type="button" class="slot" onclick="selectSlot(this)" data-value="15:00:00">3:00 PM</button>
+                <button type="button" class="slot" onclick="selectSlot(this)" data-value="15:30:00">3:30 PM</button>
+                <button type="button" class="slot" onclick="selectSlot(this)" data-value="16:00:00">4:00 PM</button>
+                <button type="button" class="slot" onclick="selectSlot(this)" data-value="16:30:00">4:30 PM</button>
+            </div>
+
+            <div class="booking-notice">
+                <span><i class="slot-swatch available"></i> Available</span>
+                <span><i class="slot-swatch booked"></i> Booked or unavailable</span>
+            </div>
+
+            <div class="form-group">
+                <label for="appointmentNotes">Appointment Notes (Optional)</label>
+                <textarea id="appointmentNotes" placeholder="Reason for visit, special requests, allergies, or patient concerns..."></textarea>
+            </div>
+
+            <div class="step-actions">
+                <button type="button" class="btn-prev" onclick="goToStep(1)">Back</button>
+                <button type="button" class="btn-next" id="nextFromStep2" disabled onclick="goToStep(3)">
+                    Next: Confirm
+                </button>
+            </div>
+        </div>
+
+        <div class="step-panel" id="panel-3">
+            <h2>Step 3: Review & Confirm</h2>
+
+            <div class="confirmation-summary">
+                <div class="summary-section">
+                    <h4>Patient</h4>
+                    <div class="summary-item"><span class="label">Name:</span><span class="value" id="confirmPatientName"></span></div>
+                    <div class="summary-item"><span class="label">Patient ID:</span><span class="value" id="confirmPatientId"></span></div>
+                    <div class="summary-item"><span class="label">Phone:</span><span class="value" id="confirmPatientPhone"></span></div>
+                </div>
+
+                <div class="summary-section">
+                    <h4>Appointment</h4>
+                    <div class="summary-item"><span class="label">Treatment:</span><span class="value" id="confirmServiceName"></span></div>
+                    <div class="summary-item"><span class="label">Add-on:</span><span class="value" id="confirmAddonName">None</span></div>
+                    <div class="summary-item"><span class="label">Specialist:</span><span class="value">Dr. Rass Shields Pimentel</span></div>
+                    <div class="summary-item"><span class="label">Date & Time:</span><span class="value" id="confirmDateTime"></span></div>
+                    <div class="summary-item"><span class="label">Clinic:</span><span class="value" id="confirmLocation"></span></div>
+                    <div class="summary-item"><span class="label">Address:</span><span class="value" id="confirmAddress"></span></div>
+                </div>
+
+                <div class="summary-section">
+                    <h4>Pricing</h4>
+                    <div class="summary-item"><span class="label">Treatment Price:</span><span class="value" id="confirmServicePrice"></span></div>
+                    <div class="summary-item"><span class="label">Add-on Price:</span><span class="value" id="confirmAddonPrice">None</span></div>
+                    <div class="summary-item total"><span class="label">Estimated Total:</span><span class="value" id="confirmTotal"></span></div>
+                </div>
+
+                <div class="summary-section">
+                    <h4>Notes</h4>
+                    <p id="confirmNotes">None</p>
+                </div>
+            </div>
+
+            <div class="step-actions">
+                <button type="button" class="btn-prev" onclick="goToStep(2)">Back</button>
+                <button type="button" class="btn-confirm" id="confirmBtn" onclick="confirmAppointment()">Confirm & Save Appointment</button>
+            </div>
+        </div>
+
+        <div class="step-panel" id="panel-success">
+            <div class="success-message">
+                <h2>Appointment Created Successfully</h2>
+                <div class="success-details">
+                    <p>Reference Number: <strong id="successRefNumber"></strong></p>
+                    <p>Patient: <strong id="successPatientName"></strong></p>
+                    <div id="successCredentials" class="credential-slip" style="display:none;">
+                        <p class="credential-title">Welcome Credentials</p>
+                        <p>Username: <strong id="successUsername"></strong></p>
+                        <p>Password: <strong id="successPassword"></strong></p>
+                        <button type="button" class="btn-secondary" onclick="copyCredentials()">Copy Credentials</button>
+                    </div>
+                    <p>The appointment has been added to Manage Sessions and the patient's history.</p>
+                </div>
+                <div class="step-actions">
+                    <a id="successManageSessionsLink" href="{% if request.user.profile.role == 'SECRETARY' %}{% url 'secretary_manage_sessions' %}{% else %}{% url 'doctor_manage_sessions' %}{% endif %}" class="btn-primary">View in Manage Sessions</a>
+                    <button type="button" class="btn-secondary" onclick="resetForm()">Create Another Appointment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const ADDR_AESTHETIC = '2nd Floor Baseline Center New Wing, Juana Osmena Street, Cebu City, Philippines 6000';
+const ADDR_OBGYNE = 'Room 404 Medical Arts Building 2, Cebu Doctors Hospital, Gov M Roa St, Cebu City, Philippines 6000';
+
+const state = {
+    patientId: null,
+    patientName: '',
+    patientPhone: '',
+    patientEmail: '',
+    patientUsername: '',
+    temporaryPassword: '',
+    serviceId: null,
+    serviceName: '',
+    serviceCategory: '',
+    servicePrice: 0,
+    addonId: null,
+    addonName: '',
+    addonPrice: 0,
+    date: '',
+    slot: '',
+    dbTime: '',
+    location: '',
+    clinicName: '',
+    address: ''
+};
+
+document.getElementById('patientSearch')?.addEventListener('input', function(e) {
+    const query = e.target.value.trim();
+    const results = document.getElementById('searchResults');
+    if (query.length < 2) {
+        results.innerHTML = '';
+        return;
+    }
+
+    fetch(`/api/search-patients/?q=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(data => {
+            results.innerHTML = (data.patients || []).map(patient => {
+                const name = `${patient.first_name || ''} ${patient.last_name || ''}`.trim() || patient.username;
+                const phone = patient.profile__phone_number || patient.phone || '';
+                return `
+                    <button type="button" class="search-result-item"
+                        onclick="selectPatient('${patient.id}', '${escapeJs(name)}', '${escapeJs(patient.email || '')}', '${escapeJs(phone)}')">
+                        <span class="result-name">${escapeHtml(name)}</span>
+                        <span class="result-email">${escapeHtml(patient.email || 'No Email')} ${phone ? ' - ' + escapeHtml(phone) : ''}</span>
+                    </button>
+                `;
+            }).join('') || '<div class="empty-result">No matching patients found.</div>';
+        });
+});
+
+document.getElementById('appointmentDate')?.addEventListener('change', function() {
+    const selected = new Date(`${this.value}T00:00:00`);
+    if (selected.getDay() === 0) {
+        showAppModal('Sundays are rest days. Please choose another date.', 'Rest Day');
+        this.value = '';
+        state.date = '';
+        validateStep2();
+        return;
+    }
+    state.date = this.value;
+    state.slot = '';
+    state.dbTime = '';
+    document.querySelectorAll('.slot').forEach(slot => slot.classList.remove('selected'));
+    refreshTimeSlots(this.value);
+    validateStep2();
+});
+
+function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    }[char]));
+}
+
+function escapeJs(value) {
+    return String(value).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
+
+function formatPatientId(id) {
+    return `#SA-${String(id).padStart(4, '0')}`;
+}
+
+function formatPrice(price) {
+    const numericPrice = parseFloat(price || 0);
+    return numericPrice > 0 ? `₱${numericPrice.toLocaleString()}` : 'Price depends on consultation';
+}
+
+function getLocalDateString(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function selectPatient(id, name, email, phone, username = '', temporaryPassword = '') {
+    state.patientId = id;
+    state.patientName = name;
+    state.patientEmail = email || '';
+    state.patientPhone = phone || '';
+    state.patientUsername = username || '';
+    state.temporaryPassword = temporaryPassword || '';
+
+    document.getElementById('patientSearch').value = '';
+    document.getElementById('searchResults').innerHTML = '';
+    document.getElementById('selectedPatientBox').style.display = 'block';
+    document.getElementById('selectedPatientName').textContent = state.patientName;
+    document.getElementById('selectedPatientId').textContent = formatPatientId(id);
+    document.getElementById('selectedPatientPhone').textContent = state.patientPhone || 'N/A';
+    document.getElementById('selectedPatientEmail').textContent = state.patientEmail || 'No Email';
+    document.getElementById('nextFromStep1').disabled = false;
+}
+
+function clearSelection() {
+    state.patientId = null;
+    state.patientName = '';
+    state.patientPhone = '';
+    state.patientEmail = '';
+    document.getElementById('selectedPatientBox').style.display = 'none';
+    document.getElementById('nextFromStep1').disabled = true;
+}
+
+function quickRegisterPatient() {
+    const name = document.getElementById('registerName').value.trim();
+    const phone = document.getElementById('registerPhone').value.trim();
+    const email = document.getElementById('registerEmail').value.trim();
+    if (!/^09\d{9}$/.test(phone)) {
+        showAppModal('Enter a valid Philippine mobile number in the format 09XXXXXXXXX.', 'Invalid Phone');
+        return;
+    }
+
+    fetch('/api/quick-register-patient/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: `name=${encodeURIComponent(name)}&phone=${encodeURIComponent(phone)}&email=${encodeURIComponent(email)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const patient = data.patient;
+            const patientName = `${patient.first_name || ''} ${patient.last_name || ''}`.trim() || patient.username;
+            selectPatient(patient.id, patientName, patient.email || '', patient.phone || phone, patient.username || '', patient.temporary_password || '');
+            document.getElementById('quickRegisterForm').reset();
+        } else {
+            showAppModal(data.error || 'Could not register patient.', 'Registration Error');
+        }
+    });
+}
+
+function filterServices(category, button) {
+    document.querySelectorAll('.tab-btn').forEach(tab => tab.classList.remove('active'));
+    button.classList.add('active');
+
+    document.querySelectorAll('.service-card').forEach(card => {
+        card.style.display = category === 'all' || card.dataset.category === category ? 'flex' : 'none';
+    });
+}
+
+function selectService(card) {
+    const serviceId = card.dataset.serviceId;
+    document.querySelectorAll('.service-card').forEach(item => item.classList.remove('selected'));
+    card.classList.add('selected');
+
+    fetch(`/api/service/${serviceId}/`)
+        .then(response => response.json())
+        .then(data => {
+            state.serviceId = data.id;
+            state.serviceName = data.name;
+            state.serviceCategory = data.category;
+            state.servicePrice = parseFloat(data.price || 0);
+            setLocation(data.category);
+
+            document.getElementById('selectedServiceBox').style.display = 'block';
+            document.getElementById('selectedServiceName').textContent = state.serviceName;
+            document.getElementById('selectedServicePrice').textContent = formatPrice(state.servicePrice);
+            validateStep2();
+        });
+}
+
+function setLocation(category) {
+    if (category === 'LASER') {
+        state.location = 'CebuDoc';
+        state.clinicName = 'OB-Gynecology Clinic - Cebu Doctors Hospital';
+        state.address = ADDR_OBGYNE;
+    } else {
+        state.location = 'Baseline';
+        state.clinicName = 'Shields Aesthetic Clinic - Baseline Center';
+        state.address = ADDR_AESTHETIC;
+    }
+
+    document.getElementById('bannerClinicTag').textContent = state.location;
+    document.getElementById('bannerClinicName').textContent = state.clinicName;
+    document.getElementById('bannerAddress').textContent = state.address;
+    document.getElementById('addressBanner').style.display = 'block';
+}
+
+function toggleAddon(card) {
+    const isSelected = card.classList.contains('selected');
+    document.querySelectorAll('.addon-card').forEach(item => item.classList.remove('selected'));
+
+    if (isSelected) {
+        state.addonId = null;
+        state.addonName = '';
+        state.addonPrice = 0;
+    } else {
+        card.classList.add('selected');
+        state.addonId = card.dataset.id;
+        state.addonName = card.dataset.name;
+        state.addonPrice = parseFloat(card.dataset.price || 0);
+    }
+}
+
+function selectSlot(slot) {
+    if (slot.classList.contains('booked')) return;
+
+    document.querySelectorAll('.slot').forEach(item => item.classList.remove('selected'));
+    slot.classList.add('selected');
+    state.slot = slot.textContent.trim();
+    state.dbTime = slot.dataset.value;
+    validateStep2();
+}
+
+async function refreshTimeSlots(selectedDate) {
+    if (!selectedDate) return;
+
+    try {
+        const response = await fetch(`/check-availability/?date=${selectedDate}&t=${Date.now()}`);
+        const data = await response.json();
+        const bookedTimes = data.booked_times || [];
+        const now = new Date();
+        const todayStr = getLocalDateString(now);
+
+        document.querySelectorAll('.slot').forEach(slot => {
+            const slotTime = slot.dataset.value;
+            let isPastOrBuffer = false;
+
+            if (selectedDate === todayStr) {
+                const [slotHour, slotMinute] = slotTime.split(':').map(Number);
+                const cutoffTime = new Date(now.getTime() + (60 * 60 * 1000));
+                const cutoffHour = cutoffTime.getHours();
+                const cutoffMinute = cutoffTime.getMinutes();
+                isPastOrBuffer = slotHour < cutoffHour || (slotHour === cutoffHour && slotMinute <= cutoffMinute);
+            }
+
+            if (bookedTimes.includes(slotTime) || isPastOrBuffer) {
+                slot.classList.add('booked');
+                if (slot.classList.contains('selected')) {
+                    slot.classList.remove('selected');
+                    state.slot = '';
+                    state.dbTime = '';
+                }
+            } else {
+                slot.classList.remove('booked');
+            }
+        });
+
+        const allSlots = document.querySelectorAll('.slot');
+        const bookedSlotsCount = document.querySelectorAll('.slot.booked').length;
+        document.getElementById('fullyBookedMessage').style.display =
+            allSlots.length > 0 && bookedSlotsCount === allSlots.length ? 'block' : 'none';
+
+        validateStep2();
+    } catch (error) {
+        document.getElementById('fullyBookedMessage').style.display = 'block';
+    }
+}
+
+function validateStep2() {
+    document.getElementById('nextFromStep2').disabled = !(state.serviceId && state.date && state.dbTime);
+}
+
+function goToStep(step) {
+    if (step === 2 && !state.patientId) return;
+    if (step === 3 && !(state.serviceId && state.date && state.dbTime)) return;
+
+    document.querySelectorAll('.step-panel').forEach(panel => panel.classList.remove('active'));
+    document.querySelectorAll('.progress-step').forEach(item => item.classList.remove('active'));
+    document.getElementById(`panel-${step}`).classList.add('active');
+    document.getElementById(`step-${step}`).classList.add('active');
+
+    if (step === 3) {
+        updateConfirmation();
+    }
+}
+
+function updateConfirmation() {
+    const total = state.servicePrice + state.addonPrice;
+    const totalDisplay = state.servicePrice > 0 ? formatPrice(total) : 'Upon Consultation';
+
+    document.getElementById('confirmPatientName').textContent = state.patientName;
+    document.getElementById('confirmPatientId').textContent = formatPatientId(state.patientId);
+    document.getElementById('confirmPatientPhone').textContent = state.patientPhone || 'N/A';
+    document.getElementById('confirmServiceName').textContent = state.serviceName;
+    document.getElementById('confirmAddonName').textContent = state.addonName || 'None';
+    document.getElementById('confirmDateTime').textContent = `${state.date} at ${state.slot}`;
+    document.getElementById('confirmLocation').textContent = state.clinicName;
+    document.getElementById('confirmAddress').textContent = state.address;
+    document.getElementById('confirmServicePrice').textContent = formatPrice(state.servicePrice);
+    document.getElementById('confirmAddonPrice').textContent = state.addonName ? formatPrice(state.addonPrice) : 'None';
+    document.getElementById('confirmTotal').textContent = totalDisplay;
+    document.getElementById('confirmNotes').textContent = document.getElementById('appointmentNotes').value.trim() || 'None';
+}
+
+async function confirmAppointment() {
+    if (!(state.patientId && state.serviceId && state.date && state.dbTime)) {
+        showAppModal('Please complete the patient, treatment, date, and time selections.', 'Incomplete Appointment');
+        return;
+    }
+
+    const availability = await fetch(`/check-availability/?date=${state.date}&t=${Date.now()}`).then(response => response.json());
+    if (availability.is_rest_day) {
+        showAppModal('Sundays are rest days. Please choose another date.', 'Rest Day');
+        goToStep(2);
+        return;
+    }
+    if ((availability.booked_times || []).includes(state.dbTime)) {
+        showAppModal('This slot was just booked. Please select another time.', 'Slot Unavailable');
+        refreshTimeSlots(state.date);
+        goToStep(2);
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('patient_id', state.patientId);
+    formData.append('service_id', state.serviceId);
+    formData.append('date', state.date);
+    formData.append('time', state.dbTime);
+    formData.append('location', state.location);
+    formData.append('notes', document.getElementById('appointmentNotes').value.trim());
+    formData.append('patient_username', state.patientUsername);
+    formData.append('temporary_password', state.temporaryPassword);
+    if (state.addonId) formData.append('addon_id', state.addonId);
+
+    const button = document.getElementById('confirmBtn');
+    button.disabled = true;
+
+    fetch('{% url "schedule_appointment" %}', {
+        method: 'POST',
+        headers: {'X-CSRFToken': '{{ csrf_token }}'},
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            document.querySelectorAll('.step-panel').forEach(panel => {
+                panel.classList.remove('active');
+                panel.style.display = '';
+            });
+            const successPanel = document.getElementById('panel-success');
+            successPanel.classList.add('active');
+            successPanel.style.display = 'block';
+            document.getElementById('successRefNumber').textContent = data.reference_number || 'Reference unavailable';
+            document.getElementById('successPatientName').textContent = state.patientName;
+            document.getElementById('successManageSessionsLink').href = data.redirect_url || document.getElementById('successManageSessionsLink').href;
+            const successUsername = data.patient_username || state.patientUsername;
+            const successPassword = data.temporary_password || state.temporaryPassword;
+            if (successUsername && successPassword) {
+                document.getElementById('successUsername').textContent = successUsername;
+                document.getElementById('successPassword').textContent = successPassword;
+                document.getElementById('successCredentials').style.display = 'block';
+            } else {
+                document.getElementById('successCredentials').style.display = 'none';
+            }
+            successPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+            showAppModal(data.error || data.message || 'Could not create appointment.', 'Appointment Error');
+            button.disabled = false;
+        }
+    })
+    .catch(() => {
+        showAppModal('A technical error occurred. Please try again.', 'Technical Error');
+        button.disabled = false;
+    });
+}
+
+function resetForm() {
+    location.reload();
+}
+
+function copyCredentials() {
+    const username = document.getElementById('successUsername').textContent;
+    const password = document.getElementById('successPassword').textContent;
+    navigator.clipboard?.writeText(`Shields Aesthetics Login\nUsername: ${username}\nPassword: ${password}`);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const dateInput = document.getElementById('appointmentDate');
+    if (dateInput) {
+        dateInput.min = getLocalDateString(new Date());
+        dateInput.addEventListener('input', function() {
+            const selected = new Date(`${this.value}T00:00:00`);
+            if (this.value && selected.getDay() === 0) {
+                showAppModal('Sundays are rest days. Please choose another date.', 'Rest Day');
+                this.value = '';
+                state.date = '';
+                state.slot = '';
+                state.dbTime = '';
+                validateStep2();
+            }
+        });
+    }
+});
+</script>
+
+<style>
+.flatpickr-calendar {
+    background: rgba(255, 255, 255, 0.92) !important;
+    border: 1px solid rgba(209, 130, 181, 0.18) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 18px 45px rgba(209, 130, 181, 0.18) !important;
+    backdrop-filter: blur(12px);
+    padding: 3px;
+}
+
+.flatpickr-day {
+    border-radius: 10px !important;
+}
+
+.flatpickr-day.today {
+    border-color: var(--primary-pink) !important;
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange {
+    background: var(--primary-pink) !important;
+    border-color: var(--primary-pink) !important;
+}
+
+.flatpickr-current-month,
+.flatpickr-weekday {
+    color: #333 !important;
+}
+
+.schedule-container {
+    max-width: 980px;
+    margin: 30px auto;
+    padding: 20px;
+}
+
+.progress-tracker {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    position: relative;
+}
+
+.progress-tracker::before {
+    content: '';
+    position: absolute;
+    top: 25px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #e0e0e0;
+    z-index: -1;
+}
+
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.step-number {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #f0f0f0;
+    border: 2px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #999;
+}
+
+.progress-step.active .step-number {
+    background: var(--primary-pink);
+    border-color: var(--primary-pink);
+    color: white;
+}
+
+.step-label {
+    font-weight: 600;
+    color: #999;
+    font-size: 0.9rem;
+}
+
+.progress-step.active .step-label {
+    color: var(--primary-pink);
+}
+
+.schedule-content {
+    background: white;
+    border-radius: 15px;
+    padding: 40px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.step-panel {
+    display: none;
+}
+
+.step-panel.active {
+    display: block;
+}
+
+.step-panel h2 {
+    color: #333;
+    margin-bottom: 30px;
+    font-size: 1.5rem;
+}
+
+.search-section,
+.quick-register-section,
+.service-selection,
+.datetime-selection,
+.addons-section {
+    margin-bottom: 30px;
+}
+
+.search-input-group {
+    position: relative;
+}
+
+#patientSearch,
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #f0f0f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+}
+
+#patientSearch:focus,
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-pink);
+}
+
+.search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #f0f0f0;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 10;
+}
+
+.search-result-item {
+    width: 100%;
+    padding: 12px 15px;
+    cursor: pointer;
+    border: none;
+    border-bottom: 1px solid #f9f9f9;
+    background: white;
+    text-align: left;
+    display: block;
+}
+
+.search-result-item:hover {
+    background: #f9f9f9;
+}
+
+.result-name,
+.result-email {
+    display: block;
+}
+
+.result-name {
+    font-weight: 600;
+    color: #333;
+}
+
+.result-email,
+.muted-text,
+.empty-result {
+    font-size: 0.85rem;
+    color: #777;
+}
+
+.empty-result {
+    padding: 12px 15px;
+}
+
+.divider {
+    text-align: center;
+    margin: 30px 0;
+    color: #999;
+}
+
+.selected-patient-box,
+.selected-service-box,
+.address-banner {
+    background: #fff0f7;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    border-left: 4px solid var(--primary-pink);
+}
+
+.info-row,
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(209, 130, 181, 0.18);
+}
+
+.label {
+    font-weight: 600;
+    color: #333;
+}
+
+.value {
+    color: var(--primary-pink);
+    font-weight: 700;
+    text-align: right;
+}
+
+.service-tabs {
+    display: flex;
+    gap: 10px;
+    margin: 12px 0 20px;
+    flex-wrap: wrap;
+}
+
+.tab-btn {
+    padding: 8px 16px;
+    border: 2px solid #f0f0f0;
+    background: white;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 600;
+}
+
+.tab-btn:hover,
+.tab-btn.active {
+    background: var(--primary-pink);
+    color: white;
+    border-color: var(--primary-pink);
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 15px;
+}
+
+.service-card,
+.addon-card {
+    border: 2px solid #f0f0f0;
+    border-radius: 10px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: white;
+    color: #333;
+}
+
+.service-card {
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    gap: 8px;
+}
+
+.service-card:hover,
+.service-card.selected,
+.addon-card:hover,
+.addon-card.selected {
+    border-color: var(--primary-pink);
+    background: #fff7fb;
+    box-shadow: 0 5px 15px rgba(209, 130, 181, 0.1);
+}
+
+.category-label {
+    color: var(--primary-pink);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.description {
+    color: #777;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.service-meta,
+.addon-price {
+    color: var(--primary-pink);
+    font-weight: 700;
+}
+
+.addons-list {
+    display: grid;
+    gap: 10px;
+}
+
+.addon-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    text-align: left;
+}
+
+.addon-card small {
+    display: block;
+    color: #777;
+    margin-top: 4px;
+}
+
+.address-tag {
+    color: var(--primary-pink);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.address-name {
+    font-weight: 700;
+    color: #333;
+    margin-top: 4px;
+}
+
+.address-text {
+    color: #555;
+    margin-top: 4px;
+}
+
+.field-label,
+.form-group label,
+.search-section label,
+.service-selection > label,
+.addons-section > label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group textarea {
+    min-height: 90px;
+    resize: vertical;
+}
+
+.time-slots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.slot {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #555;
+    border: 1px solid #d4d4d4;
+    border-radius: 10px;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: white;
+}
+
+.slot:hover {
+    border-color: var(--primary-pink);
+    color: var(--primary-pink);
+    background: #fff7fb;
+}
+
+.slot.selected {
+    background: var(--primary-pink);
+    border-color: var(--primary-pink);
+    color: white;
+}
+
+.slot.booked {
+    opacity: 0.35;
+    cursor: not-allowed;
+    text-decoration: line-through;
+    background: #ebebeb;
+    pointer-events: none;
+}
+
+.fully-booked-message {
+    color: #a33;
+    background: #fff1f1;
+    border: 1px solid #f3c6c6;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.booking-notice {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    color: #555;
+    font-size: 0.86rem;
+    padding-top: 8px;
+    margin-bottom: 24px;
+}
+
+.slot-swatch {
+    display: inline-block;
+    width: 11px;
+    height: 11px;
+    border-radius: 3px;
+    margin-right: 6px;
+    vertical-align: -1px;
+}
+
+.slot-swatch.available {
+    background: white;
+    border: 1px solid #d4d4d4;
+}
+
+.slot-swatch.booked {
+    background: #ebebeb;
+    border: 1px solid #ccc;
+}
+
+.confirmation-summary {
+    background: #f9f9f9;
+    padding: 30px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+}
+
+.summary-section {
+    margin-bottom: 25px;
+    padding-bottom: 25px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.summary-section:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.summary-section h4 {
+    color: var(--primary-pink);
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+.summary-item.total {
+    font-weight: 700;
+    font-size: 1.15rem;
+    padding-top: 15px;
+    border-top: 2px solid var(--primary-pink);
+}
+
+.step-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+    justify-content: flex-end;
+}
+
+.btn-next,
+.btn-prev,
+.btn-confirm,
+.btn-register,
+.btn-change,
+.btn-primary,
+.btn-secondary {
+    display: inline-block;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.btn-next,
+.btn-confirm,
+.btn-register,
+.btn-primary {
+    background: var(--primary-pink);
+    color: white;
+}
+
+.btn-next:hover:not(:disabled),
+.btn-confirm:hover:not(:disabled),
+.btn-register:hover,
+.btn-primary:hover {
+    background: #FFC0CB;
+}
+
+.btn-next:disabled,
+.btn-confirm:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.btn-prev,
+.btn-change,
+.btn-secondary {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.btn-prev:hover,
+.btn-change:hover,
+.btn-secondary:hover {
+    background: #e0e0e0;
+}
+
+.success-message {
+    text-align: center;
+    padding: 50px 20px;
+}
+
+.success-message h2 {
+    color: #238457;
+    margin-bottom: 20px;
+}
+
+.success-details {
+    background: #f0f9f6;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+}
+
+.credential-slip {
+    background: #fff;
+    border: 1px dashed var(--primary-pink);
+    border-radius: 10px;
+    padding: 14px;
+    margin: 14px auto;
+    max-width: 360px;
+}
+
+.credential-title {
+    color: var(--primary-pink);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+@media (max-width: 768px) {
+    .schedule-content {
+        padding: 20px;
+    }
+
+    .services-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .step-actions {
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+
+    .step-actions > * {
+        width: 100%;
+        text-align: center;
+    }
+
+    .progress-tracker {
+        gap: 10px;
+    }
+
+    .step-number {
+        width: 40px;
+        height: 40px;
+        font-size: 0.85rem;
+    }
+
+    .info-row,
+    .summary-item {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .value {
+        text-align: left;
+    }
+}
+</style>
+{% endblock %}

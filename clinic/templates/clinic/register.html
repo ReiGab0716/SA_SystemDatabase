@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shields Aesthetics | Register</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #fdf2f4 0%, #fae1e6 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px 0;
+        }
+
+        .register-box {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            width: 380px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(235, 91, 192, 0.1);
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        h2 { color: #444; font-weight: 600; margin-bottom: 20px; }
+        
+        form p { text-align: left; font-size: 0.85rem; color: #666; margin: 10px 0; }
+
+        input {
+            width: 100%; padding: 12px; margin: 5px 0;
+            border: 1.5px solid #eee; border-radius: 10px;
+            box-sizing: border-box; background-color: #fafafa;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        input:focus { 
+            outline: none; border-color: #FFC0CB; background-color: #fff; 
+            transform: scale(1.02); box-shadow: 0 0 8px rgba(235, 91, 192, 0.2);
+        }
+        
+        .btn {
+            background: linear-gradient(to right, #FFC0CB, #ff99aa);
+            color: white; border: none; padding: 14px;
+            width: 100%; border-radius: 30px; cursor: pointer;
+            font-weight: 600; margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(235, 91, 192, 0.3);
+            animation: pulse 2s infinite ease-in-out;
+            animation-delay: 1s;
+        }
+
+        .btn:hover {
+            background: linear-gradient(to right, #FFC0CB, #FFC0CB);
+            box-shadow: 0 6px 20px rgba(235, 91, 192, 0.4);
+        }
+
+        .footer-links {
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        
+        .footer-links a {
+            color: #FFC0CB;
+            text-decoration: none; 
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline !important; 
+            color: #FFC0CB; 
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="register-box">
+        <h2>Join Shields Aesthetics</h2>
+        
+        <form method="POST">
+            {% csrf_token %}
+            
+            <input type="text" name="first_name" placeholder="First Name" minlength="2" required>
+            <input type="text" name="last_name" placeholder="Last Name" minlength="2" required>
+            <input type="text" name="phone" placeholder="09XXXXXXXXX" pattern="09[0-9]{9}" maxlength="11"
+                pattern="[0-9]{11}" 
+                title="Please enter exactly 11 digits" 
+                maxlength="11" 
+                required>
+            
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+            
+            {{ form.as_p }}
+            
+            <div style="text-align: left; margin: -10px 0 20px 5px; display: flex; align-items: center;">
+                <input type="checkbox" id="toggleCheck" onclick="togglePassword()" style="width: auto; margin-right: 8px;"> 
+                <label for="toggleCheck" style="font-size: 0.8rem; color: #888; cursor: pointer;">Show Password</label>
+            </div>
+
+            <button type="submit" class="btn">CREATE ACCOUNT</button>
+        </form>
+        
+        <div class="footer-links">
+            <p>Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+        </div>
+    </div>
+
+    <script>
+    function togglePassword() {
+        const pass1 = document.getElementById('id_password1');
+        const pass2 = document.getElementById('id_password2');
+        if (pass1) pass1.type = pass1.type === "password" ? "text" : "password";
+        if (pass2) pass2.type = pass2.type === "password" ? "text" : "password";
+    }
+    </script>
+</body>
+</html>

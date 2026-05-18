@@ -1,0 +1,1959 @@
+{% extends request.headers.HX_Request|yesno:"clinic/base_partial.html,clinic/base_patient.html" %}
+{% load static %}
+
+{% block content %}
+
+
+<style>
+  .form-wrapper *, .form-wrapper *::before, .form-wrapper *::after { 
+      box-sizing: border-box; 
+  }
+
+  :root {
+    --pink-50: #FFF5F7;
+    --pink-100: #FFE4EA;
+    --pink-200: #FFBDCC;
+    --pink-300: #F99BB3;
+    --pink-400: #F07090;
+    --pink-500: #D9517A;
+    --pink-600: #B83A62;
+    --white: #FFFFFF;
+    --gray-50: #FAFAFA;
+    --gray-100: #F5F5F5;
+    --gray-300: #D4D4D4;
+    --gray-400: #A3A3A3;
+    --gray-600: #525252;
+    --gray-800: #262626;
+    --text: #1A1A1A;
+    --border: rgba(240, 112, 144, 0.2);
+    --border-soft: rgba(0,0,0,0.07);
+  }
+
+  /* NAV */
+  
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(160deg, var(--pink-50) 0%, var(--white) 55%, var(--pink-50) 100%);
+    padding: 5rem 2rem 4rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-deco {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .hero-deco-1 {
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(249,155,179,0.15) 0%, transparent 70%);
+    top: -100px; right: -100px;
+  }
+
+  .hero-deco-2 {
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(249,155,179,0.12) 0%, transparent 70%);
+    bottom: -80px; left: -60px;
+  }
+
+  .hero-badge {
+    display: inline-block;
+    background: var(--pink-100);
+    color: var(--pink-600);
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-weight: 500;
+    padding: 6px 18px;
+    border-radius: 20px;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 52px;
+    font-weight: 400;
+    line-height: 1.12;
+    color: var(--text);
+    margin-bottom: 1rem;
+    position: relative;
+  }
+
+  .hero h1 em {
+    color: var(--pink-500);
+    font-style: italic;
+  }
+
+  .hero-sub {
+    font-size: 15px;
+    color: var(--gray-400);
+    font-weight: 300;
+    max-width: 420px;
+    margin: 0 auto 2.5rem;
+    letter-spacing: 0.3px;
+  }
+
+  .hero-divider {
+    display: flex; align-items: center; justify-content: center; gap: 16px;
+    margin-bottom: 0;
+  }
+
+  .hero-divider::before, .hero-divider::after {
+    content: '';
+    width: 60px; height: 1px;
+    background: var(--pink-200);
+  }
+
+  .hero-divider-icon {
+    width: 6px; height: 6px;
+    background: var(--pink-300);
+    border-radius: 50%;
+  }
+
+  /* FORM WRAPPER */
+  .form-wrapper {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 5rem;
+  }
+
+  /* SECTION TABS */
+  .category-tabs {
+    display: flex;
+    gap: 0;
+    background: var(--pink-50);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 5px;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .cat-tab {
+    flex: 1;
+    min-width: 120px;
+    padding: 10px 14px;
+    border: none;
+    background: transparent;
+    border-radius: 10px;
+    font-family: 'Jost', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--gray-400);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .cat-tab:hover { color: var(--pink-500); background: rgba(240,112,144,0.06); }
+
+  .cat-tab.active {
+    background: var(--white);
+    color: var(--pink-600);
+    box-shadow: 0 1px 8px rgba(0,0,0,0.07);
+  }
+
+  /* STEP CARD */
+  .step-card {
+    background: var(--white);
+    border: 1px solid var(--border-soft);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.04); 
+  }
+
+  .step-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 1.5rem;
+  }
+
+  .step-num {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--pink-100);
+    color: var(--pink-600);
+    font-size: 13px;
+    font-weight: 500;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .step-info h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 400;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .step-info p {
+    font-size: 12px;
+    color: var(--gray-400);
+    margin-top: 2px;
+    font-weight: 300;
+  }
+
+  /* SERVICE PANEL */
+  .service-panel { display: none; }
+  .service-panel.active { display: block; }
+
+  .service-category-title {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--pink-400);
+    font-weight: 500;
+    margin-bottom: 10px;
+    padding-left: 2px;
+  }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    margin-bottom: 1rem;
+  }
+
+  .service-item {
+    border: 1px solid var(--border-soft);
+    border-radius: 14px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--gray-50);
+    position: relative;
+  }
+
+  .service-item:hover {
+    border-color: var(--pink-300);
+    background: var(--pink-50);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(240,112,144,0.1);
+  }
+
+  .service-item.selected {
+    border-color: var(--pink-500);
+    background: var(--pink-50);
+    box-shadow: 0 4px 16px rgba(240,112,144,0.15);
+  }
+
+  .service-item.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 10px; right: 12px;
+    font-size: 11px;
+    color: var(--pink-500);
+    font-weight: 500;
+  }
+
+  .service-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 6px;
+    line-height: 1.3;
+    padding-right: 16px;
+  }
+
+  .service-price {
+    font-size: 13px;
+    color: var(--pink-500);
+    font-weight: 500;
+  }
+
+  .service-tbd {
+    font-size: 11px;
+    color: var(--gray-400);
+    font-style: italic;
+  }
+
+  /* ADD ON */
+  .addon-card {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px dashed var(--pink-300);
+    border-radius: 14px;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, var(--pink-50), var(--white));
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 8px;
+  }
+
+  .addon-card:hover { border-color: var(--pink-500); background: var(--pink-100); }
+
+  .addon-card.selected { 
+      border: 2px solid var(--pink-500) !important; 
+      background-color: var(--pink-100) !important; 
+  }
+
+  .addon-left { display: flex; align-items: center; gap: 12px; }
+
+  .addon-icon {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--pink-200);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .addon-text-name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .addon-text-sub { font-size: 11px; color: var(--gray-400); font-weight: 300; }
+  .addon-price { font-size: 14px; font-weight: 500; color: var(--pink-500); white-space: nowrap; }
+
+  .addon-check {
+    width: 20px; height: 20px;
+    border: 1.5px solid var(--pink-300);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  .addon-card.selected .addon-check {
+      background: var(--pink-500) !important;
+      border-color: var(--pink-500) !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+  }
+
+  .addon-card.selected .addon-check::after {
+      content: '✓';
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+  }
+
+  /* SPECIALIST */
+  .specialist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+  }
+
+  .spec-card {
+    border: 1px solid var(--border-soft);
+    border-radius: 16px;
+    padding: 20px 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--gray-50);
+  }
+
+  .spec-card:hover { border-color: var(--pink-300); background: var(--pink-50); }
+  .spec-card.selected { border-color: var(--pink-500); background: var(--pink-50); }
+
+  .spec-avatar {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    margin: 0 auto 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: var(--pink-600);
+    background: var(--pink-100);
+    border: 1.5px solid var(--pink-200);
+  }
+
+  .spec-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+  .spec-role { font-size: 11px; color: var(--gray-400); font-weight: 300; }
+
+  /* SCHEDULE */
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+
+  .form-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gray-600);
+    font-weight: 500;
+  }
+  * {
+    box-sizing: border-box;
+}
+
+  input[type="text"], input[type="tel"], input[type="email"], input[type="date"], select, textarea {
+    font-family: 'Jost', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text);
+    background: var(--gray-50);
+    border: 1px solid var(--gray-300);
+    border-radius: 12px;
+    padding: 12px 16px;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--pink-400);
+    background: var(--white);
+  }
+
+  textarea { resize: vertical; min-height: 90px; }
+
+  .time-slots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .slot {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--gray-600);
+    border: 1px solid var(--gray-300);
+    border-radius: 10px;
+    padding: 9px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--white);
+  }
+
+  .slot:hover { border-color: var(--pink-400); color: var(--pink-500); background: var(--pink-50); }
+  .slot.selected { background: var(--pink-500); border-color: var(--pink-500); color: var(--white); }
+  .slot.booked { 
+      opacity: 0.35; 
+      cursor: not-allowed; 
+      text-decoration: line-through; 
+      pointer-events: none !important; 
+      background-color: #f0f0f0 !important; 
+  }
+
+  /* SUMMARY */
+  .summary-card {
+    background: linear-gradient(135deg, var(--pink-50) 0%, var(--white) 100%);
+    border: 1px solid var(--pink-200);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-top: 0.5rem;
+  }
+
+  .summary-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--text);
+    margin-bottom: 1.25rem;
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  .summary-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--pink-200);
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(240,112,144,0.12);
+    gap: 16px;
+  }
+
+  .summary-row:last-of-type { border-bottom: none; }
+  .sum-key { font-size: 12px; color: var(--gray-400); font-weight: 300; letter-spacing: 0.5px; }
+  .sum-val { font-size: 13px; color: var(--text); font-weight: 500; text-align: right; max-width: 60%; }
+
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1.5px solid var(--pink-200);
+  }
+
+  .total-label { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--gray-400); font-weight: 500; }
+  .total-price { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 400; color: var(--pink-500); }
+
+  .book-btn {
+      width: 100%;
+      padding: 18px;
+      background: var(--pink-500); 
+      color: var(--white);
+      border: none;
+      border-radius: 14px;
+      font-family: 'Jost', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.25s;
+      margin-top: 1.25rem;
+  }
+
+  .book-btn:hover {
+      background: var(--pink-600);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(217,81,122,0.25);
+  }
+  .book-btn:active { transform: translateY(0); }
+
+  /* SUCCESS */
+  .success-screen {
+    display: none;
+    text-align: center;
+    padding: 4rem 2rem;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .success-bloom {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--pink-300), var(--pink-500));
+    margin: 0 auto 2rem;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 30px rgba(217,81,122,0.25);
+  }
+
+  .success-bloom svg { width: 36px; height: 36px; }
+
+  .success-h {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    font-weight: 400;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+    line-height: 1.2;
+  }
+
+  .success-h em { color: var(--pink-500); font-style: italic; }
+
+  .success-p {
+    font-size: 14px;
+    color: var(--gray-400);
+    font-weight: 300;
+    line-height: 1.8;
+    margin-bottom: 2rem;
+  }
+
+  .ref-box {
+    display: inline-block;
+    background: var(--pink-50);
+    border: 1px solid var(--pink-200);
+    border-radius: 14px;
+    padding: 1.25rem 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .ref-label-txt { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--gray-400); margin-bottom: 6px; }
+  .ref-code { font-family: 'Playfair Display', serif; font-size: 28px; letter-spacing: 4px; color: var(--pink-500); }
+
+  .confirm-details {
+    font-size: 13px;
+    color: var(--gray-600);
+    line-height: 2;
+    background: var(--gray-50);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    text-align: left;
+    margin-bottom: 2rem;
+  }
+
+  .confirm-details strong { font-weight: 500; color: var(--text); }
+
+  .restart-btn {
+    background: transparent;
+    border: 1px solid var(--pink-200);
+    border-radius: 12px;
+    color: var(--pink-500);
+    font-family: 'Jost', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    padding: 12px 28px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+  }
+
+  .restart-btn:hover { background: var(--pink-50); border-color: var(--pink-400); }
+
+  /* FOOTER */
+  .form-footer {
+    text-align: center;
+    padding: 2rem;
+    border-top: 1px solid var(--border-soft);
+    font-size: 11px;
+    color: var(--gray-400);
+    letter-spacing: 1px;
+  }
+
+  /* ADDRESS BANNER */
+  .address-banner {
+    display: none;
+    align-items: flex-start;
+    gap: 14px;
+    background: linear-gradient(135deg, #FFF0F4, #FFF8FA);
+    border: 1px solid var(--pink-200);
+    border-left: 4px solid var(--pink-400);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-top: 1.25rem;
+    animation: fadeSlideIn 0.3s ease;
+  }
+
+  .address-banner.visible { display: flex; }
+
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .address-icon {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--pink-100);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .address-icon svg { width: 16px; height: 16px; }
+
+  .address-body { flex: 1; }
+
+  .address-clinic-tag {
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--pink-500);
+    font-weight: 500;
+    margin-bottom: 3px;
+  }
+
+  .address-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .address-text {
+    font-size: 12px;
+    color: var(--gray-600);
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  /* SINGLE SPECIALIST */
+  .single-spec {
+    display: flex; align-items: center; gap: 16px;
+    background: var(--gray-50);
+    border: 1px solid var(--border-soft);
+    border-radius: 16px;
+    padding: 18px 20px;
+  }
+
+  .single-spec-avatar {
+    width: 60px; 
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid var(--pink-200);
+    flex-shrink: 0;
+    overflow: hidden; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .single-spec-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+  }
+
+  .single-spec-name { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+  .single-spec-role { font-size: 12px; color: var(--gray-400); font-weight: 300; }
+  .single-spec-badge {
+    margin-left: auto;
+    background: var(--pink-100);
+    color: var(--pink-600);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: 20px;
+  }
+
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 36px; }
+    .form-row { grid-template-columns: 1fr; }
+    .services-grid { grid-template-columns: 1fr 1fr; }
+    .cat-tab { font-size: 10px; padding: 8px 8px; }
+    .single-spec-badge { display: none; }
+  }
+
+  .flatpickr-calendar {
+      background: #fff;
+      border-radius: 20px !important;
+      box-shadow: 0 10px 40px rgba(217, 81, 122, 0.1) !important;
+      border: 1px solid var(--pink-100) !important;
+      padding: 15px;
+      z-index: 999 !important;
+      width: 307px !important;
+      max-width: 100vw !important;
+      box-sizing: border-box !important;
+  }
+
+  .flatpickr-innerContainer, 
+  .flatpickr-days, 
+  .dayContainer {
+      width: 100% !important;
+      min-width: 100% !important;
+      max-width: 100% !important;
+  }
+
+/* Wide layout for Desktop (2 Months) */
+@media (min-width: 769px) {
+    .flatpickr-calendar.multiMonth {
+        width: 650px !important; 
+    }
+}
+
+  .messages-container {
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+  }
+
+  .alert {
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+  }
+
+  .alert-success {
+      background-color: #d1fae5;
+      color: #065f46;
+  }
+
+  .alert-error, .alert-danger {
+      background-color: #fee2e2;
+      color: #991b1b;
+  }
+
+
+ .modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 10000;
+  animation: fadeIn 0.3s ease;
+}
+
+  .modal-card {
+      background: white;
+      padding: 40px;
+      border-radius: 35px;
+      width: 90%;
+      max-width: 450px;
+      text-align: center;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.15);
+  }
+
+  .confirm-item {
+      background: #fdf2f9;
+      padding: 15px;
+      border-radius: 15px;
+      margin-bottom: 12px;
+      font-size: 0.95rem;
+      color: #444;
+      text-align: left;
+  }
+
+  .modal-footer {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+  }
+
+  .btn-secondary {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 18px;
+      background: #f5f5f5;
+      font-weight: 600;
+      cursor: pointer;
+  }
+
+  .btn-primary {
+    flex: 2;
+    padding: 14px;
+    border: none;
+    border-radius: 18px;
+    background: #FFC0CB;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* Responsive layout for Mobile (1 Month) */
+@media (max-width: 768px) {
+    .flatpickr-calendar {
+        width: 307px !important;
+        margin: 10px auto 0 auto !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+        border: 1px solid #e5e7eb !important;
+        overflow: visible !important; /* CRITICAL: Allows header to show if parent has constraints */
+        left: auto !important;
+        transform: none !important;
+    }
+    .flatpickr-months .flatpickr-month:nth-child(2) {
+        display: none !important; 
+    }
+    .flatpickr-innerContainer {
+        display: block !important;
+    }
+    .flatpickr-months {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        background: #fff !important; 
+        height: 50px !important;     
+        align-items: center !important;
+        overflow: visible !important;
+    }
+
+    .flatpickr-current-month {
+        padding: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        height: 100% !important;
+        position: relative !important;
+        font-size: 100% !important;
+        flex-direction: row !important;
+        gap: 8px !important;
+        width: 100% !important;
+    }
+
+    /* Ensure the arrows don't disappear on narrow screens */
+    .flatpickr-prev-month, .flatpickr-next-month {
+        display: flex !important;
+        align-items: center !important;
+        height: 48px !important;
+    }
+
+    .flatpickr-current-month .numInputWrapper {
+        display: inline-block !important;
+        width: 50px !important;
+        color: var(--pink-600) !important;
+    }
+}
+
+/* Branding Colors */
+.flatpickr-day.selected {
+    background: var(--pink-500) !important;
+    border-color: var(--pink-500) !important;
+}
+
+.flatpickr-day:hover {
+    background: var(--pink-100) !important;
+}
+
+.flatpickr-months .flatpickr-month {
+    color: var(--pink-600) !important;
+    fill: var(--pink-600) !important;
+}
+
+.flatpickr-current-month .flatpickr-monthDropdown-months {
+    display: inline-block !important;
+    color: var(--pink-600) !important;
+    background: transparent !important;
+    width: auto !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+}
+
+span.flatpickr-weekday {
+    color: var(--pink-400) !important;
+    font-weight: 500;
+}
+
+.flatpickr-months .flatpickr-prev-month, 
+.flatpickr-months .flatpickr-next-month {
+    fill: var(--pink-500) !important;
+}
+
+/* Styling for slots that are already taken */
+.slot.booked-slot {
+    background-color: #f1f3f5 !important; /* Light grey background */
+    color: #adb5bd !important;            /* Muted text color */
+    border: 1px dashed #dee2e6 !important; /* Dashed border to show it's "unavailable" */
+    cursor: not-allowed !important;       /* Change cursor to a 'block' sign */
+    position: relative;
+    overflow: hidden;
+}
+
+/* Optional: Add a diagonal line or "X" effect to booked slots */
+.slot.booked-slot::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: #dee2e6;
+    transform: rotate(-15deg); /* Slight diagonal strike-through */
+}
+
+/* Ensure the hover effect doesn't trigger for booked slots */
+.slot.booked-slot:hover {
+    background-color: #f1f3f5 !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+
+</style>
+
+
+<!-- MAIN FORM -->
+<form method="POST" action="{% url 'book_appointment' %}" class="form-wrapper" id="appointmentForm">
+    {% csrf_token %}
+    <!-- These IDs match what your scripts use to fill in the data -->
+    <input type="hidden" name="service_id" id="submit_service_id">
+    <input type="hidden" name="date" id="submit_date">
+    <input type="hidden" name="time" id="submit_time">
+    <input type="hidden" name="address" id="submit_address">
+    <input type="hidden" name="addon" id="submit_addon" value="false">
+    <input type="hidden" name="addon_id" id="submit_addon_id">
+    
+    <!-- This textarea is where user notes are stored -->
+    <textarea name="skinConcerns" id="skinConcerns" style="display:none;"></textarea>
+</form>
+
+<div id="booking-interface">
+  <!-- STEP 1: SERVICE SELECTION -->
+<div class="step-card">
+    <div class="step-header">
+        <div class="step-num">1</div>
+        <div class="step-info">
+            <h2>Select a Service</h2>
+            <p>Choose from our curated treatment categories</p>
+        </div>
+    </div>
+
+    <!-- CATEGORY NAVIGATION -->
+    <div class="category-tabs">
+        <button type="button" class="cat-tab active" onclick="showCat('facial', this)">Facial</button>
+        <button type="button" class="cat-tab" onclick="showCat('zo', this)">ZO Professional</button>
+        <button type="button" class="cat-tab" onclick="showCat('doctors', this)">Doctors Procedure</button>
+        <button type="button" class="cat-tab" onclick="showCat('laser', this)">Laser Gynecology</button>
+    </div>
+
+    <!-- FACIAL PANEL -->
+    <div class="service-panel active" id="cat-facial">
+        <div class="service-category-title">Facial Treatments</div>
+        <div class="services-grid">
+            {% for s in facial_services %}
+            <div class="service-item" onclick="selectService(this)" 
+                data-id="{{ s.id }}" data-name="{{ s.name }}" data-price="{{ s.price }}" data-category="FACIAL">
+                <div class="service-name">{{ s.name }}</div>
+                <div class="service-price">
+                    {% if s.price > 0 %}₱{{ s.price|floatformat:0 }}{% else %}Price depends on consultation{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- ZO PANEL -->
+    <div class="service-panel" id="cat-zo">
+        <div class="service-category-title">ZO Professional Facial</div>
+        <div class="services-grid">
+            {% for s in zo_services %}
+            <div class="service-item" onclick="selectService(this)" 
+                data-id="{{ s.id }}" data-name="{{ s.name }}" data-price="{{ s.price }}" data-category="ZO">
+                <div class="service-name">{{ s.name }}</div>
+                <div class="service-price">
+                    {% if s.price > 0 %}₱{{ s.price|floatformat:0 }}{% else %}Price depends on consultation{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- DOCTORS PANEL -->
+    <div class="service-panel" id="cat-doctors">
+        <div class="service-category-title">Doctors Procedure — Pricing upon consultation</div>
+        <div class="services-grid">
+            {% for s in doctor_services %}
+            <div class="service-item" onclick="selectService(this)" 
+                data-id="{{ s.id }}" data-name="{{ s.name }}" data-price="{{ s.price }}" data-category="DOCTOR">
+                <div class="service-name">{{ s.name }}</div>
+                <div class="service-price">
+                    {% if s.price > 0 %}₱{{ s.price|floatformat:0 }}{% else %}Price depends on consultation{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- LASER PANEL -->
+    <div class="service-panel" id="cat-laser">
+        <div class="service-category-title">Laser Gynecology</div>
+        <div class="services-grid">
+            {% for s in laser_services %}
+            <div class="service-item" onclick="selectService(this)" 
+                data-id="{{ s.id }}" data-name="{{ s.name }}" data-price="{{ s.price }}" data-category="LASER">
+                <div class="service-name">{{ s.name }}</div>
+                <div class="service-price">
+                    {% if s.price > 0 %}₱{{ s.price|floatformat:0 }}{% else %}Price depends on consultation{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- REVEAL SECTION: ADD-ON -->
+    <div id="addonSection" class="addon-section-wrapper" style="margin-top: 2rem; margin-bottom: 1rem; display: none;">
+        <div class="service-category-title">Available Add-Ons</div>
+        
+        {% for addon in addons %}
+        <div class="addon-card" 
+            onclick="toggleAddon('{{ addon.id }}', '{{ addon.name }}', '{{ addon.price }}')" 
+            data-id="{{ addon.id }}" 
+            data-price="{{ addon.price }}">
+            
+            <div class="addon-left">
+                <div class="addon-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="8" stroke="#D9517A" stroke-width="1.5"/>
+                        <path d="M12 8 L12 16 M8 12 L16 12" stroke="#D9517A" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="addon-text-name">{{ addon.name }}</div>
+                    <div class="addon-text-sub">Add this to your treatment</div>
+                </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px;">
+                <span class="addon-price">+ ₱{{ addon.price|floatformat:0 }}</span>
+                <!-- Note: If you have many add-ons, you might need unique IDs for the checkmarks, 
+                    e.g., id="addonCheck_{{ addon.id }}" -->
+                <div class="addon-check"></div>
+            </div>
+        </div>
+        {% empty %}
+        <p style="font-size: 0.8rem; color: #999;">No add-ons available at this time.</p>
+        {% endfor %}
+    </div>
+
+    <!-- REVEAL SECTION: ADDRESS BANNER -->
+    <div class="address-banner" id="addressBanner" style="display: none; margin-top: 1rem;">
+        <div class="address-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#D9517A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                <circle cx="12" cy="9" r="2.5"/>
+            </svg>
+        </div>
+        <div class="address-body">
+            <div class="address-clinic-tag" id="bannerClinicTag">Shields Aesthetic</div>
+            <div class="address-name" id="bannerClinicName">Clinic Location</div>
+            <div class="address-text" id="bannerAddress">—</div>
+        </div>
+    </div>
+</div>
+
+  <!-- STEP 2: SPECIALIST -->
+    <div class="step-card">
+    <div class="step-header">
+        <div class="step-num">2</div>
+        <div class="step-info">
+        <h2>Your Specialist</h2>
+        <p>All consultations are handled by licensed professionals</p>
+        </div>
+    </div>
+    <div class="single-spec">
+        <div class="single-spec-avatar">
+        <img src="{% static 'images/DOCPIC.jpg' %}" alt="Dr. Rass Shields Pimentel">
+        </div>
+        <div>
+        <div class="single-spec-name">Dr. Rass Shields Pimentel</div>
+        <div class="single-spec-role">Lead Aesthetic Doctor & OB-Gynecologist</div>
+        </div>
+        <div class="single-spec-badge">Your Specialist</div>
+    </div>
+    </div>
+
+  <!-- STEP 3: DATE & TIME -->
+<div class="step-card">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <div class="step-info">
+        <h2>Pick Your Schedule</h2>
+        <p>Select a date and preferred time slot</p>
+      </div>
+    </div>
+
+    <!-- Date Selection -->
+    <div class="form-row">
+      <div class="form-group full">
+          <label class="form-label">Preferred Date</label>
+          <input type="text" id="dateInput" name="date" class="custom-input" placeholder="Select Date" readonly>
+      </div>
+    </div>
+    
+    <label class="form-label" style="display:block; margin-bottom:10px;">Available Time Slots</label>
+
+    <!-- Fully Booked Alert (Managed by refreshTimeSlots JS) -->
+    <div id="fullyBookedMessage" style="display: none; color: #d9534f; background: #fdf2f2; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 0.85rem; text-align: center; border: 1px solid #f5c6cb;">
+        <i class="fas fa-exclamation-circle"></i> This day is fully booked. Please try another date!
+    </div>
+
+    <!-- Time Slot Grid -->
+    <div class="time-slots">
+      <div class="slot" onclick="selectSlot(this)" data-value="09:00:00">9:00 AM</div>
+      <div class="slot" onclick="selectSlot(this)" data-value="09:30:00">9:30 AM</div>
+      <div class="slot" onclick="selectSlot(this)" data-value="10:00:00">10:00 AM</div>
+      <div class="slot" onclick="selectSlot(this)" data-value="10:30:00">10:30 AM</div>
+      <div class="slot" onclick="selectSlot(this)" data-value="11:00:00">11:00 AM</div>
+      <div class="slot" onclick="selectSlot(this)" data-value="11:30:00">11:30 AM</div>
+      <div class="slot" onclick="selectSlot(this)" data-value="13:00:00">1:00 PM</div>
+      <div class="slot" onclick="selectSlot(this)" data-value="13:30:00">1:30 PM</div>
+      <div class="slot" onclick="selectSlot(this)" data-value="14:00:00">2:00 PM</div>
+      <div class="slot" onclick="selectSlot(this)" data-value="14:30:00">2:30 PM</div>
+      <div class="slot" onclick="selectSlot(this)" data-value="15:00:00">3:00 PM</div>
+      <div class="slot" onclick="selectSlot(this)" data-value="15:30:00">3:30 PM</div>
+      <div class="slot" onclick="selectSlot(this)" data-value="16:00:00">4:00 PM</div>
+      <div class="slot" onclick="selectSlot(this)" data-value="16:30:00">4:30 PM</div>
+    </div>
+
+    <!-- Integrated Booking Legend -->
+    <div class="booking-notice" style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #eee; color: #666;">
+        <p style="margin-bottom: 8px; font-weight: 600; color: #333; font-size: 0.85rem;">
+            <i class="fas fa-info-circle" style="color: var(--primary-pink); margin-right: 5px;"></i> 
+            Appointment Availability
+        </p>
+        <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 10px;">
+            <div style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem;">
+                <span style="width: 10px; height: 10px; background: #fff; border: 1px solid #ddd; border-radius: 2px;"></span>
+                <span>Available</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem;">
+                <span style="width: 10px; height: 10px; background: #ebebeb; border: 1px solid #ccc; border-radius: 2px;"></span>
+                <span style="text-decoration: line-through; color: #999;">Fully Booked</span>
+            </div>
+        </div>
+        <p style="font-style: italic; font-size: 0.75rem; line-height: 1.4; margin: 0;">
+            *To ensure quality service, slots are locked once an appointment is confirmed. If your preferred time is unavailable, please select another date.
+        </p>
+    </div>
+</div>
+
+  <!-- STEP 4: DETAILS -->
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">4</div>
+      <div class="step-info">
+        <h2>Your Details</h2>
+        <p>Fill in your contact information</p>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">First Name</label>
+        <input type="text" placeholder="Maria" id="firstName" oninput="updateSummary()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Last Name</label>
+        <input type="text" placeholder="Santos" id="lastName" oninput="updateSummary()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mobile Number</label>
+        <input type="tel" placeholder="09XXXXXXXXX" id="phone" pattern="09[0-9]{9}" maxlength="11">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" placeholder="maria@email.com" id="email">
+      </div>
+      <div class="form-group full">
+          <label class="form-label">Skin Concerns / Special Notes</label>
+          <textarea id="skinConcernsArea" placeholder="Let us know about your skin type, any allergies, medications, or specific concerns you'd like to discuss during your visit..."></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+  <!-- SUMMARY -->
+  <div class="summary-card">
+    <div class="summary-title">Appointment Summary</div>
+    <div class="summary-row">
+      <span class="sum-key">Service</span>
+      <span class="sum-val" id="sumService">— Select a service above</span>
+    </div>
+    <div class="summary-row">
+      <span class="sum-key">Add-On</span>
+      <span class="sum-val" id="sumAddon">None</span>
+    </div>
+    <div class="summary-row">
+      <span class="sum-key">Specialist</span>
+      <span class="sum-val" id="sumSpec">Dr. Rass Shields Pimentel</span>
+    </div>
+    <div class="summary-row">
+      <span class="sum-key">Clinic Address</span>
+      <span class="sum-val" id="sumAddress">— Select a service</span>
+    </div>
+    <div class="summary-row">
+      <span class="sum-key">Date & Time</span>
+      <span class="sum-val" id="sumDateTime">— · 9:00 AM</span>
+    </div>
+    <div class="summary-row">
+      <span class="sum-key">Client Name</span>
+      <span class="sum-val" id="sumClient">—</span>
+    </div>
+    <div class="total-row">
+      <span class="total-label">Estimated Total</span>
+      <span class="total-price" id="sumTotal">—</span>
+    </div>
+  </div>
+
+  <div id="booking-interface">
+    <!-- All your Service, Date, and Confirm buttons go here -->
+    <button type="button" onclick="onConfirmClick(event)" class="book-btn" style="margin-top: 2rem;">
+        BOOK APPOINTMENT
+    </button>
+</div>
+
+</form>
+
+<!-- SUCCESS --
+<!-- Success Screen (Hidden by default) -->
+<div class="success-screen" id="successScreen" style="display: none !important; text-align: center; padding: 40px; margin-bottom: 30px; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+    
+    <!-- Success Icon -->
+    <div class="success-bloom" style="margin-bottom: 20px;">
+        <svg viewBox="0 0 36 36" fill="none" style="width: 80px; height: 80px; margin: 0 auto;">
+            <circle cx="18" cy="18" r="18" fill="#27ae60"/>
+            <path d="M10 18L16 24L26 12" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </div>
+
+    <!-- Heading -->
+    <div class="success-h" style="font-size: 2.2rem; color: #2d2d2d; font-family: 'Poppins', sans-serif; line-height: 1.2;">
+        You're all set,<br><em style="color: #FFC0CB; font-style: italic;">beautiful!</em>
+    </div>
+
+    <!-- Description -->
+    <p class="success-p" style="color: #666; margin: 15px 0; font-family: 'Inter', sans-serif;">
+        Your appointment at Shields Aesthetics has been confirmed.
+    </p>
+    
+    <!-- Reference Code Box -->
+    <div class="ref-box" style="background: #fff0f7; padding: 20px; border-radius: 15px; display: inline-block; min-width: 240px; margin-bottom: 20px; border: 1px dashed #FFC0CB;">
+        <div class="ref-label-txt" style="font-size: 0.75rem; color: #FFC0CB; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+            Booking Reference
+        </div>
+        <!-- CRITICAL: The id "refCode" must exist here for confirmAppointment() to inject the real code -->
+        <div id="refCode" class="ref-code" style="font-size: 1.8rem; font-weight: 800; color: #333; margin-top: 5px;">
+            TRN-XXXXXX
+        </div>
+    </div>
+    
+    <!-- Instructions -->
+    <p style="font-size: 0.85rem; color: #999; margin-bottom: 20px;">
+        Please save or screenshot this code for your visit.
+    </p>
+    
+    <!-- Action Button -->
+    <div style="margin-top: 10px;">
+        <button type="button" onclick="window.location.reload()" style="background: #FFC0CB; color: white; border: none; padding: 14px 30px; border-radius: 30px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 15px rgba(209, 130, 181, 0.3); transition: transform 0.2s;">
+            Book Another Appointment
+        </button>
+    </div>
+</div>
+
+
+<!-- Confirmation Modal Overlay -->
+<div id="confirmationModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card">
+        <div class="modal-header">
+            <i class="fas fa-calendar-check" style="color: var(--primary-pink); font-size: 2.5rem; margin-bottom: 15px;"></i>
+            <h3>Confirm Appointment?</h3>
+            <p>Please review your details before we finalize your session at Shields Aesthetic.</p>
+        </div>
+        <div class="modal-body">
+            <div class="confirm-item">
+                <strong>Treatment:</strong> <span id="confirmService">-</span>
+            </div>
+            <div class="confirm-item">
+                <strong>Add-on:</strong> <span id="confirmAddon">None</span>
+            </div>
+            <div class="confirm-item">
+                <strong>Schedule:</strong> <span id="confirmDateTime">-</span>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <!-- This closes the modal if they made a mistake -->
+            <button type="button" class="btn-secondary" onclick="closeModal()">Go Back</button>
+            
+            <!-- This triggers the confirmAppointment function we just updated -->
+            <button type="button" class="btn-primary" onclick="confirmAppointment()">Yes, Confirm Booking</button>
+        </div>
+    </div>
+</div>
+
+<footer class="form-footer">
+  © 2025 Shields Aesthetic &nbsp;·&nbsp; All rights reserved &nbsp;·&nbsp; Appointments subject to availability
+</footer>
+
+<script>
+// 1. CONSTANTS & CONFIGURATION
+if (typeof ADDR_AESTHETIC === 'undefined') {
+    var ADDR_AESTHETIC = '2nd Floor Baseline Center New Wing, Juana Osmena Street, Cebu City, Philippines 6000';
+}
+if (typeof ADDR_OBGYNE === 'undefined') {
+    var ADDR_OBGYNE = 'Room 404 Medical Arts Building 2, Cebu Doctors Hospital, Gov M Roa St, Cebu City, Philippines 6000';
+}
+
+// 2. INITIAL STATE
+let state = {
+    serviceId: null,
+    serviceName: null, 
+    servicePrice: 0,
+    // ADD THESE THREE LINES:
+    addon: false,
+    addonId: null,
+    addonPrice: 0,
+    
+    spec: 'Dr. Rass Shields Pimentel',
+    date: null,
+    slot: '9:00 AM',
+    dbTime: '09:00:00',
+    address: 'Shields Aesthetic Clinic — Baseline Center — 2nd Floor New Wing'
+};
+
+// 3. CATEGORY SWITCHING
+function showCat(cat, btn) {
+    if (window.event) window.event.preventDefault();
+    
+    // Switch panels - We target panels inside the category container only
+    document.querySelectorAll('.service-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
+    
+    const targetPanel = document.getElementById('cat-' + cat);
+    if (targetPanel) targetPanel.classList.add('active');
+    btn.classList.add('active');
+
+    // --- FIX: ADD-ON VISIBILITY GUARD ---
+    const addonSection = document.getElementById('addonSection');
+    // If a service is already selected, or even if we just switch cats, keep it visible
+    if (addonSection) {
+        addonSection.style.setProperty('display', 'block', 'important');
+    }
+    // ------------------------------------
+
+    const dateStr = document.getElementById('dateInput').value;
+    if (dateStr) {
+        setTimeout(() => {
+            refreshTimeSlots(dateStr);
+        }, 50); 
+    }
+}
+
+// 4. SERVICE SELECTION
+function selectService(el) {
+    // 1. Highlight the selected card
+    document.querySelectorAll('.service-item').forEach(item => item.classList.remove('selected'));
+    el.classList.add('selected');
+
+    // 2. Update the State Object
+    state.serviceId = el.dataset.id;
+    state.serviceName = el.dataset.name;
+    state.servicePrice = parseInt(el.dataset.price) || 0;
+    
+    // 3. THE REVEAL: Force the Add-On and Address sections to show
+    const addonSection = document.getElementById('addonSection');
+    const addressBanner = document.getElementById('addressBanner');
+    
+    if (addonSection) {
+        // We use !important here to override the initial hidden state in the HTML
+        addonSection.style.setProperty('display', 'block', 'important');
+        addonSection.style.visibility = 'visible';
+        addonSection.style.opacity = '1';
+    }
+
+    if (addressBanner) {
+        // Address banners usually look better with flex for icon alignment
+        addressBanner.style.setProperty('display', 'flex', 'important');
+    }
+
+    // 4. Logic for Clinic Location (Address Sync)
+    const category = el.dataset.category; 
+    const addrText = document.getElementById('bannerAddress');
+    
+    // Check category to determine clinic location
+    if (category === 'LASER') {
+        state.address = 'Room 404 Medical Arts Building 2, Cebu Doctors Hospital, Gov M Roa St, Cebu City, Philippines 6000';
+        if (addrText) addrText.textContent = state.address;
+    } else {
+        state.address = '2nd Floor Baseline Center New Wing, Juana Osmena Street, Cebu City, Philippines 6000';
+        if (addrText) addrText.textContent = state.address;
+    }
+
+    // 5. Refresh the UI
+    // This updates the price and sidebar totals
+    updateSummary();
+}
+
+// Add this to your date selection logic (within your calendar listener)
+function selectDate(dateString) {
+    state.date = dateString;
+    updateSummary(); // Refresh the UI
+}
+
+// 5. ADD-ON TOGGLE (Synced with Global State)
+function toggleAddon(addonId, addonName, addonPrice) {
+    const cards = document.querySelectorAll('.addon-card');
+    const selectedCard = Array.from(cards).find(card => card.getAttribute('data-id') === addonId);
+    const price = parseFloat(addonPrice) || 0;
+
+    if (selectedCard.classList.contains('selected')) {
+        // DESELECT: Clear state
+        selectedCard.classList.remove('selected');
+        state.addon = false;
+        state.addonId = null;
+        state.addonName = null;
+        state.addonPrice = 0;
+    } else {
+        // SELECT: Update state (and deselect others)
+        cards.forEach(c => c.classList.remove('selected'));
+        selectedCard.classList.add('selected');
+        
+        state.addon = true;
+        state.addonId = addonId;
+        state.addonName = addonName;
+        state.addonPrice = price;
+    }
+    
+    // Now updateSummary() will see the new values in the state object
+    updateSummary(); 
+}
+
+// 6. TIME SLOT SELECTION
+function selectSlot(el) {
+    document.querySelectorAll('.slot').forEach(s => s.classList.remove('selected'));
+    el.classList.add('selected');
+
+    state.slot = el.textContent.trim();
+    state.dbTime = el.getAttribute('data-value'); // Grabs the 09:00:00 format
+
+    updateSummary();
+}
+
+// 7. SUMMARY SYNC
+function updateSummary() {
+    // 1. THE STICKY LOCK
+    const currentDate = document.getElementById('dateInput')?.value;
+    if (currentDate) {
+        refreshTimeSlots(currentDate);
+    }
+
+    // 2. GET USER INFO
+    const fn = document.getElementById('firstName')?.value.trim() || '';
+    const ln = document.getElementById('lastName')?.value.trim() || '';
+    const dateDisplay = state.date ? state.date : "Select Date";
+    
+    // 3. UPDATE VISUAL SUMMARY
+    document.getElementById('sumService').textContent = state.serviceName || '— Select a service';
+    document.getElementById('sumDateTime').textContent = `${dateDisplay} · ${state.slot || 'Select Time'}`;
+    document.getElementById('sumClient').textContent = (fn || ln) ? `${fn} ${ln}` : '—';
+    document.getElementById('sumAddress').textContent = state.address || '—';
+
+    // FIX: Handling the Add-on display properly
+    const sumAddon = document.getElementById('sumAddon');
+    if (sumAddon) {
+        if (state.addon && state.addonName) {
+            sumAddon.textContent = `${state.addonName} (+₱${state.addonPrice.toLocaleString()})`;
+        } else {
+            sumAddon.textContent = "None";
+        }
+    }
+
+    // 4. TOTAL CALCULATION
+    const totalDisplay = document.getElementById('sumTotal');
+    if (state.serviceId) {
+        // Simple math: Main Service + Addon
+        const mainPrice = parseFloat(state.servicePrice || 0);
+        const addonPrice = state.addon ? parseFloat(state.addonPrice || 0) : 0;
+        const total = mainPrice + addonPrice;
+
+        if (state.servicePrice === 0) {
+            totalDisplay.textContent = "Upon Consultation";
+        } else {
+            totalDisplay.textContent = "₱" + total.toLocaleString();
+        }
+    } else {
+        totalDisplay.textContent = "—";
+    }
+
+    // 5. SYNC HIDDEN INPUTS (For Django Form Submission)
+    const subService = document.getElementById('submit_service_id');
+    const subDate = document.getElementById('submit_date');
+    const subTime = document.getElementById('submit_time');
+    const subAddon = document.getElementById('submit_addon_id');
+    const subNotes = document.getElementById('submit_notes');
+
+    if (subService) subService.value = state.serviceId || '';
+    if (subDate) subDate.value = state.date || '';
+    if (subTime) subTime.value = state.dbTime || '';
+    
+    // Ensure the hidden input gets the actual DB Primary Key
+    if (subAddon) {
+        subAddon.value = state.addon ? state.addonId : '';
+    }
+    
+    const notesArea = document.getElementById('skinConcernsArea');
+    if (subNotes && notesArea) {
+        subNotes.value = notesArea.value;
+    }
+}
+
+// 8. FINAL CONFIRMATION
+// Add 'event' as a parameter
+// PART 1: The trigger that shows the Modal
+async function confirmAppointment() {
+    const formElement = document.getElementById('appointmentForm');
+    const formData = formElement ? new FormData(formElement) : new FormData();
+
+    formData.append('service_id', state.serviceId);
+    formData.append('date', state.date);
+    formData.append('time', state.dbTime);
+    
+    if (state.addon && state.addonId) {
+        formData.append('addon_id', state.addonId);
+    }
+
+    // Keeps hidden POST fields synced with the selected service.
+    // This ensures the "Skin Concerns" text is sent to the backend
+    const notesArea = document.getElementById('skinConcernsArea');
+    if (notesArea) {
+        formData.append('skinConcerns', notesArea.value);
+    }
+    // ---------------------------
+
+    try {
+        const response = await fetch(window.location.href, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            if (typeof closeModal === 'function') {
+                closeModal();
+            }
+            
+            const bookingInterface = document.getElementById('booking-interface');
+            if (bookingInterface) {
+                bookingInterface.style.display = 'none';
+            }
+            
+            const refCodeDisplay = document.getElementById('refCode');
+            if (refCodeDisplay) {
+                refCodeDisplay.innerText = data.ref_code;
+            }
+
+            const successScreen = document.getElementById('successScreen');
+            if (successScreen) {
+                successScreen.style.setProperty('display', 'block', 'important');
+                successScreen.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            
+        } else {
+            showAppModal("Error: " + (data.message || "Booking failed."), "Booking Error");
+        }
+    } catch (error) {
+        showAppModal("A system error occurred. Please refresh the page.", "Technical Error");
+    }
+}
+
+function onConfirmClick(event) {
+    if (event) event.preventDefault();
+
+    const dateInputVal = document.getElementById('dateInput').value;
+    if (dateInputVal && !state.date) {
+        state.date = dateInputVal;
+    }
+
+    if (!state.serviceId) {
+        showAppModal('Please select a treatment/service first.', 'Treatment Required');
+        return;
+    }
+    
+    if (!state.date || state.date === "") {
+        showAppModal('Please select a preferred date on the calendar.', 'Date Required');
+        return;
+    }
+
+    // Sync the Skin Concerns textarea to the state object.
+    const notesArea = document.getElementById('skinConcernsArea');
+    if (notesArea) {
+        state.skinConcerns = notesArea.value;
+    }
+
+    // Update the confirmation modal summary.
+    const confirmServiceEl = document.getElementById('confirmService');
+    const confirmAddonEl = document.getElementById('confirmAddon');
+    const confirmDateTimeEl = document.getElementById('confirmDateTime');
+    
+    if (confirmServiceEl) confirmServiceEl.innerText = state.serviceName;
+    if (confirmAddonEl) {
+        confirmAddonEl.innerText = state.addon && state.addonName
+            ? `${state.addonName} (+₱${state.addonPrice.toLocaleString()})`
+            : 'None';
+    }
+    if (confirmDateTimeEl) confirmDateTimeEl.innerText = `${state.date} at ${state.slot}`;
+    // ----------------------------
+
+    const modal = document.getElementById('confirmationModal');
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+}
+
+// PART 2: Helper to hide the Modal
+function closeModal() {
+    const modal = document.getElementById('confirmationModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function closeConfirmModal() {
+    closeModal();
+}
+
+// PART 3: The actual Background Submission
+function executeFinalBooking() {
+    // 1. SYNC: Force JavaScript state into the hidden HTML form fields
+    const serviceInput = document.getElementById('submit_service_id');
+    const dateInput = document.getElementById('submit_date');
+    const timeInput = document.getElementById('submit_time');
+    const concernsArea = document.getElementById('skinConcernsArea');
+    const hiddenNotes = document.getElementById('skinConcerns');
+
+    // Update the values from your 'state' object
+    if (serviceInput) serviceInput.value = state.serviceId;
+    if (dateInput) dateInput.value = state.date;
+    if (timeInput) timeInput.value = state.dbTime; 
+    if (concernsArea && hiddenNotes) hiddenNotes.value = concernsArea.value;
+
+    // 2. VALIDATION: Prevent submission if date is missing
+    if (!state.date || state.date === "") {
+        showAppModal("Please select a date on the calendar.", "Date Required");
+        return;
+    }
+
+    // 3. UI: Hide modal immediately
+    closeConfirmModal();
+
+    const form = document.getElementById('mainForm');
+    const formData = new FormData(form);
+
+    fetch(form.action || window.location.href, {
+        method: "POST",
+        body: formData,
+        headers: {
+            "X-Requested-With": "XMLHttpRequest",
+            "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Hide booking interface[cite: 1]
+            const bookingInterface = document.getElementById('booking-interface');
+            if (bookingInterface) {
+                bookingInterface.style.setProperty('display', 'none', 'important');
+            }
+
+            // Show Success Screen[cite: 1]
+            const successScreen = document.getElementById('successScreen');
+            successScreen.style.setProperty('display', 'block', 'important');
+
+            // Inject the Reference code from Django[cite: 1]
+            const refCodeDisplay = document.getElementById('refCode');
+            if (refCodeDisplay) {
+                refCodeDisplay.innerText = data.ref_code;
+            }
+
+            // Center view[cite: 1]
+            setTimeout(() => {
+                successScreen.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 50);
+        } else {
+            showAppModal("Error: " + (data.message || "Could not complete booking."), "Booking Error");
+        }
+    })
+    .catch(() => {
+        showAppModal("A technical error occurred. Please check your connection.", "Technical Error");
+    });
+}
+
+function restart() {
+    window.location.reload(); // Quickest way to reset the state and form
+}
+
+// 1. THE BRAIN: This function talks to your Django view
+async function refreshTimeSlots(selectedDate) {
+    if (!selectedDate) return;
+
+    try {
+        const response = await fetch(`/check-availability/?date=${selectedDate}&t=${new Date().getTime()}`);
+        const data = await response.json();
+        const bookedTimes = data.booked_times; 
+
+        // 1. Get current time context
+        const now = new Date();
+        const todayStr = now.toISOString().split('T')[0]; 
+
+        document.querySelectorAll('.slot').forEach(slot => {
+            const slotTime = slot.getAttribute('data-value'); 
+            
+            // 2. Determine if the slot is in the past OR within the buffer window
+            let isPastOrBuffer = false;
+            if (selectedDate === todayStr) {
+                const [slotHour, slotMinute] = slotTime.split(':').map(Number);
+                
+                // --- BUFFER CONFIGURATION ---
+                const bufferHours = 1; // Set this to the number of hours notice you need
+                const cutoffTime = new Date(now.getTime() + (bufferHours * 60 * 60 * 1000));
+                const cutoffHour = cutoffTime.getHours();
+                const cutoffMinute = cutoffTime.getMinutes();
+                // ----------------------------
+
+                // If the current time is May 3, 11:00 PM, and the buffer is 1 hour, 
+                // the cutoff rolls over to May 4, 12:00 AM. 
+                // However, since this check only runs if selectedDate === todayStr,
+                // it effectively clears out the remaining "late" slots for the current day.
+                if (slotHour < cutoffHour || (slotHour === cutoffHour && slotMinute <= cutoffMinute)) {
+                    isPastOrBuffer = true;
+                }
+            }
+
+            // 3. Apply the "Sticky Lock" if it's either Booked OR within the Buffer
+            if (bookedTimes.includes(slotTime) || isPastOrBuffer) {
+                slot.classList.add('booked');
+                slot.style.setProperty('pointer-events', 'none', 'important');
+                slot.style.setProperty('opacity', '0.3', 'important');
+                slot.style.setProperty('background-color', '#ebebeb', 'important');
+                slot.style.setProperty('cursor', 'not-allowed', 'important');
+                slot.style.textDecoration = 'line-through';
+            } else {
+                // --- THE ATOMIC UNLOCK ---
+                slot.classList.remove('booked');
+                slot.style.removeProperty('pointer-events');
+                slot.style.removeProperty('opacity');
+                slot.style.removeProperty('background-color');
+                slot.style.removeProperty('cursor');
+                slot.style.textDecoration = 'none';
+
+                slot.style.setProperty('pointer-events', 'auto', 'important');
+                slot.style.setProperty('opacity', '1', 'important');
+                slot.style.setProperty('cursor', 'pointer', 'important');
+            }
+        });
+
+        // 4. FULLY BOOKED ALERT LOGIC
+        const allSlots = document.querySelectorAll('.slot');
+        const bookedSlotsCount = document.querySelectorAll('.slot.booked').length;
+        const alertMessage = document.getElementById('fullyBookedMessage');
+
+        if (alertMessage) {
+            alertMessage.style.display = (allSlots.length > 0 && bookedSlotsCount === allSlots.length) ? 'block' : 'none';
+        }
+
+    } catch (error) {
+        const alertMessage = document.getElementById('fullyBookedMessage');
+        if (alertMessage) alertMessage.style.display = 'block';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Initialize Flatpickr
+    const fp = flatpickr("#dateInput", {
+        minDate: "today",
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "F j, Y",
+        altInputClass: "form-control custom-input", 
+        static: true, 
+        disableMobile: "true",
+        onChange: function(selectedDates, dateStr, instance) {
+            // A. Update your local state
+            state.date = dateStr; 
+            state.slotDate = instance.formatDate(selectedDates[0], "F j, Y");
+            
+            // B. Sync with the hidden input for the POST request
+            const hiddenDate = document.getElementById('submit_date');
+            if(hiddenDate) hiddenDate.value = dateStr;
+
+            // C. Refresh the slots (This calls your Step 3 function)
+            refreshTimeSlots(dateStr);
+
+            // D. UI Updates
+            updateSummary();
+            instance.close();
+        }
+    });
+
+    // 2. Initial Run (Optional): If a date is pre-filled, check it immediately
+    const dateInput = document.getElementById('dateInput');
+    if (dateInput && dateInput.value) {
+        refreshTimeSlots(dateInput.value);
+    }
+});
+
+async function submitBooking() {
+    // 1. Collect data from your hidden inputs and text area
+    const formData = new FormData();
+    formData.append('service_id', document.getElementById('service_id').value);
+    formData.append('addon_id', document.getElementById('addon_id').value);
+    formData.append('date', document.getElementById('submit_date').value);
+    formData.append('time', document.getElementById('submit_time').value);
+    formData.append('skinConcerns', document.getElementById('skinConcerns').value);
+    
+    // 2. Add the CSRF Token (Required by Django for security)
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    try {
+        const response = await fetch('/book-appointment/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            // Show a success message or redirect
+            showAppModal("Booking Successful! Your Reference: " + result.ref_code, "Booking Created");
+            window.location.href = '/patient-dashboard/'; // Or your dashboard URL
+        } else {
+            // Show the error (like the "Duplicate" error we wrote in Python)
+            showAppModal("Error: " + result.message, "Booking Error");
+        }
+    } catch (error) {
+        showAppModal("Something went wrong with the system. Please try again.", "Technical Error");
+    }
+}
+
+// 3. Attach this to your "Confirm" or "Book Now" button
+document.getElementById('confirmBookingBtn').addEventListener('click', function(e) {
+    e.preventDefault();
+    submitBooking();
+});
+
+async function selectTime(element) {
+    const selectedDate = document.getElementById('dateInput').value;
+
+    // 1. FAST CHECK: Immediate stop if the UI already knows it's booked
+    if (element.classList.contains('booked') || element.classList.contains('booked-slot')) {
+        return; 
+    }
+
+    // 2. LIVE VERIFICATION: Ask the database if it's STILL available
+    try {
+        const response = await fetch(`/check-availability/?date=${selectedDate}`);
+        const data = await response.json();
+        const bookedTimes = data.booked_times; //
+        const slotValue = element.getAttribute('data-value');
+
+        // 3. EMERGENCY LOCK: If someone booked it while you were looking at the screen
+        if (bookedTimes.includes(slotValue)) {
+            element.classList.add('booked');
+            element.style.pointerEvents = "none"; //
+            element.style.opacity = "0.3"; //
+            showAppModal("This slot was just taken! Please pick another.", "Slot Unavailable");
+            return;
+        }
+
+        // 4. SUCCESS: Proceed with selection
+        document.querySelectorAll('.slot').forEach(s => s.classList.remove('active'));
+        element.classList.add('active');
+
+        // Update your State and Hidden Inputs
+        state.dbTime = slotValue;
+        state.slot = element.innerText;
+
+        const hiddenTimeInput = document.getElementById('submit_time');
+        if(hiddenTimeInput) hiddenTimeInput.value = slotValue;
+
+        // Update the UI Summary
+        updateSummary();
+
+    } catch (error) {}
+}
+
+// This creates the "Watcher"
+const interfaceWatcher = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const selectedDate = document.getElementById('dateInput')?.value;
+            
+            // Re-show Addon if a service was already picked
+            const addonSection = document.getElementById('addonSection');
+            if (state.serviceId && addonSection) {
+                addonSection.style.setProperty('display', 'block', 'important');
+            }
+
+            if (selectedDate) {
+                refreshTimeSlots(selectedDate);
+            }
+        }
+    });
+}, { threshold: 0.1 });
+
+// Tell the watcher to keep an eye on your booking container
+const bookingSection = document.getElementById('booking-interface');
+if (bookingSection) {
+    interfaceWatcher.observe(bookingSection);
+}
+
+</script>
+ 
+{% endblock %}
