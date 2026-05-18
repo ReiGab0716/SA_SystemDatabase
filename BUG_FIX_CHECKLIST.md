@@ -15,4 +15,5 @@
 - [x] Show patient photos in doctor/secretary patient information modals and patient detail page.
 - [x] Serve uploaded media URLs in deployed environments.
 - [x] Run Django validation and create migrations.
+- [x] Ensure Render runs database migrations before starting the web server.
 - [x] Commit and push changes to GitHub for Render auto-deploy.
