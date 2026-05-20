@@ -9,3 +9,9 @@ Fix the staff Schedule Appointment page used by secretary and doctor accounts so
 - [x] Improve mobile responsive layout for the staff Schedule Appointment flow.
 - [x] Verify the Django template renders and existing checks pass.
 - [x] Commit and push the completed fix to GitHub.
+
+## Follow-up Mobile Input Alignment
+- [x] Keep all input fields and textareas inside the mobile content panel.
+- [x] Center the date field, notes box, and time slot controls on narrow screens.
+- [x] Re-run Django checks/tests.
+- [x] Commit and push the follow-up fix.

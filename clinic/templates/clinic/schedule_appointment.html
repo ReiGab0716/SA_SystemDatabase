@@ -738,6 +738,12 @@ document.addEventListener('DOMContentLoaded', function() {
     box-sizing: border-box;
 }
 
+.schedule-container *,
+.schedule-container *::before,
+.schedule-container *::after {
+    box-sizing: border-box;
+}
+
 .progress-tracker {
     display: flex;
     justify-content: space-between;
@@ -830,11 +836,13 @@ document.addEventListener('DOMContentLoaded', function() {
 .form-group input,
 .form-group textarea {
     width: 100%;
+    max-width: 100%;
     padding: 12px 15px;
     border: 2px solid #f0f0f0;
     border-radius: 8px;
     font-size: 1rem;
     font-family: inherit;
+    display: block;
 }
 
 #patientSearch:focus,
@@ -1071,14 +1079,22 @@ document.addEventListener('DOMContentLoaded', function() {
     margin-bottom: 20px;
 }
 
+.datetime-selection {
+    width: 100%;
+}
+
+.datetime-selection .form-group {
+    width: min(100%, 420px);
+}
+
 .form-group textarea {
     min-height: 90px;
     resize: vertical;
 }
 
 .time-slots {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
     gap: 8px;
     margin-bottom: 16px;
 }
@@ -1093,6 +1109,8 @@ document.addEventListener('DOMContentLoaded', function() {
     cursor: pointer;
     transition: all 0.2s;
     background: white;
+    min-height: 44px;
+    text-align: center;
 }
 
 .slot:hover {
@@ -1290,6 +1308,26 @@ document.addEventListener('DOMContentLoaded', function() {
     .step-panel h2 {
         font-size: 1.25rem;
         margin-bottom: 22px;
+    }
+
+    .search-section,
+    .quick-register-section,
+    .service-selection,
+    .datetime-selection,
+    .addons-section,
+    .form-group {
+        width: 100%;
+    }
+
+    .datetime-selection .form-group {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .time-slots {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        justify-content: center;
+        gap: 10px;
     }
 
     .services-grid {
