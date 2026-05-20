@@ -97,7 +97,6 @@
                     <button type="button" class="service-card" data-service-id="{{ service.id }}" data-category="FACIAL" onclick="selectService(this)">
                         <span class="category-label">Facial Treatments</span>
                         <strong>{{ service.name }}</strong>
-                        <span class="description">{{ service.description|default:"" }}</span>
                         <span class="service-meta">
                             {% if service.price > 0 %}₱{{ service.price|floatformat:0 }}{% else %}Price depends on consultation{% endif %}
                         </span>
@@ -108,7 +107,6 @@
                     <button type="button" class="service-card" data-service-id="{{ service.id }}" data-category="ZO" onclick="selectService(this)">
                         <span class="category-label">ZO Professional Facial</span>
                         <strong>{{ service.name }}</strong>
-                        <span class="description">{{ service.description|default:"" }}</span>
                         <span class="service-meta">
                             {% if service.price > 0 %}₱{{ service.price|floatformat:0 }}{% else %}Price depends on consultation{% endif %}
                         </span>
@@ -119,7 +117,6 @@
                     <button type="button" class="service-card" data-service-id="{{ service.id }}" data-category="DOCTOR" onclick="selectService(this)">
                         <span class="category-label">Doctors Procedure</span>
                         <strong>{{ service.name }}</strong>
-                        <span class="description">{{ service.description|default:"" }}</span>
                         <span class="service-meta">
                             {% if service.price > 0 %}₱{{ service.price|floatformat:0 }}{% else %}Price depends on consultation{% endif %}
                         </span>
@@ -130,7 +127,6 @@
                     <button type="button" class="service-card" data-service-id="{{ service.id }}" data-category="LASER" onclick="selectService(this)">
                         <span class="category-label">Laser Gynecology</span>
                         <strong>{{ service.name }}</strong>
-                        <span class="description">{{ service.description|default:"" }}</span>
                         <span class="service-meta">
                             {% if service.price > 0 %}₱{{ service.price|floatformat:0 }}{% else %}Price depends on consultation{% endif %}
                         </span>
@@ -735,9 +731,11 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .schedule-container {
+    width: 100%;
     max-width: 980px;
     margin: 30px auto;
     padding: 20px;
+    box-sizing: border-box;
 }
 
 .progress-tracker {
@@ -797,8 +795,9 @@ document.addEventListener('DOMContentLoaded', function() {
 .schedule-content {
     background: white;
     border-radius: 15px;
-    padding: 40px;
+    padding: clamp(18px, 4vw, 40px);
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    overflow: hidden;
 }
 
 .step-panel {
@@ -946,6 +945,8 @@ document.addEventListener('DOMContentLoaded', function() {
     cursor: pointer;
     transition: all 0.2s;
     font-weight: 600;
+    min-height: 40px;
+    white-space: normal;
 }
 
 .tab-btn:hover,
@@ -957,7 +958,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 .services-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
     gap: 15px;
 }
 
@@ -973,12 +974,20 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .service-card {
-    min-height: 150px;
+    min-width: 0;
+    min-height: 118px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     text-align: left;
     gap: 8px;
+}
+
+.service-card strong,
+.addon-card strong,
+.summary-item,
+.info-row {
+    overflow-wrap: anywhere;
 }
 
 .service-card:hover,
@@ -1007,6 +1016,7 @@ document.addEventListener('DOMContentLoaded', function() {
 .addon-price {
     color: var(--primary-pink);
     font-weight: 700;
+    margin-top: auto;
 }
 
 .addons-list {
@@ -1268,12 +1278,40 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 @media (max-width: 768px) {
+    .schedule-container {
+        margin: 12px auto;
+        padding: 12px;
+    }
+
     .schedule-content {
-        padding: 20px;
+        border-radius: 12px;
+    }
+
+    .step-panel h2 {
+        font-size: 1.25rem;
+        margin-bottom: 22px;
     }
 
     .services-grid {
         grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .service-card {
+        min-height: auto;
+        padding: 13px;
+    }
+
+    .service-tabs {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .tab-btn {
+        width: 100%;
+        padding: 10px 8px;
+        border-radius: 10px;
     }
 
     .step-actions {
@@ -1288,6 +1326,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     .progress-tracker {
         gap: 10px;
+        margin-bottom: 24px;
     }
 
     .step-number {
@@ -1304,6 +1343,48 @@ document.addEventListener('DOMContentLoaded', function() {
 
     .value {
         text-align: left;
+    }
+
+    .addon-card {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .addon-price {
+        margin-top: 0;
+    }
+}
+
+@media (max-width: 420px) {
+    .schedule-container {
+        padding: 8px;
+    }
+
+    .progress-tracker::before {
+        top: 18px;
+    }
+
+    .step-number {
+        width: 36px;
+        height: 36px;
+    }
+
+    .step-label {
+        font-size: 0.78rem;
+    }
+
+    .service-tabs {
+        grid-template-columns: 1fr;
+    }
+
+    .btn-next,
+    .btn-prev,
+    .btn-confirm,
+    .btn-register,
+    .btn-change,
+    .btn-primary,
+    .btn-secondary {
+        padding: 12px 14px;
     }
 }
 </style>
