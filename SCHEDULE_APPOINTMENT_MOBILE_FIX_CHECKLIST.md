@@ -15,3 +15,10 @@ Fix the staff Schedule Appointment page used by secretary and doctor accounts so
 - [x] Center the date field, notes box, and time slot controls on narrow screens.
 - [x] Re-run Django checks/tests.
 - [x] Commit and push the follow-up fix.
+
+## Follow-up Confirmation Modal Alignment
+- [x] Make confirm, complete, and cancel modal messages wrap inside the card on mobile.
+- [x] Stack modal actions on small screens so buttons are not cut off.
+- [x] Apply the modal fix to secretary, doctor, and patient session pages.
+- [x] Re-run Django checks/tests.
+- [x] Commit and push the modal fix.
