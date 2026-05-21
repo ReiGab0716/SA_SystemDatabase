@@ -10,7 +10,7 @@
             </div>
             <div class="counter-group">
                 <div class="session-counter" id="result-counter">
-                    {{ total_visits }} confirmed session{{ total_visits|pluralize }}
+                    {{ total_visits }} completed session{{ total_visits|pluralize }}
                 </div>
             </div>
         </div>
@@ -189,7 +189,7 @@ document.addEventListener('input', function (e) {
 
         // Update the counter dynamically
         if (query === "") {
-            counter.innerText = `{{ total_visits }} confirmed session{{ total_visits|pluralize }}`;
+            counter.innerText = `{{ total_visits }} completed session{{ total_visits|pluralize }}`;
             counter.style.background = "#fff0f7"; // Original pink
         } else {
             counter.innerText = `Showing ${visibleCount} of ${totalCount}`;

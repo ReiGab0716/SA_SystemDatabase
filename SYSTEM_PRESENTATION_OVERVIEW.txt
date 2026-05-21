@@ -1,0 +1,354 @@
+SHIELDS AESTHETICS WEBSITE SYSTEM PRESENTATION OVERVIEW
+
+1. System Overview
+
+Shields Aesthetics is a Django-based clinic appointment and management website.
+It supports three main user roles: Patient, Secretary, and Doctor. The system
+lets patients book appointments, lets clinic staff schedule appointments for
+patients, and lets doctors manage clinical sessions, patient notes, users, and
+sales reports.
+
+The website is connected to GitHub and deployed on Render. Render runs the
+Django project using Gunicorn, applies database migrations during deployment,
+and serves the application through the WSGI entry point.
+
+
+2. Main Technologies Used
+
+Backend framework:
+Django 6.0.4
+
+Programming language:
+Python 3.12.1
+
+Database:
+PostgreSQL in production or local development when configured through .env.
+The project also supports DATABASE_URL through dj-database-url, which is common
+for Render and other cloud platforms.
+
+Frontend:
+Django templates, HTML, CSS, JavaScript, HTMX-style partial loading in selected
+pages, Font Awesome icons, and responsive mobile styling.
+
+Static file handling:
+WhiteNoise is used for static files in production.
+
+Image handling:
+Pillow supports uploaded service images and user profile photos.
+
+Admin interface:
+Django admin is customized with django-jazzmin.
+
+Deployment:
+Render runs:
+python manage.py migrate --noinput && gunicorn core.wsgi:application
+
+
+3. Important Project Folders and Files
+
+manage.py
+The Django command runner used for migrations, tests, checks, and local server
+startup.
+
+core/
+The main Django project configuration folder.
+
+core/settings.py
+Contains installed apps, middleware, database settings, static and media file
+settings, security settings, Jazzmin admin customization, and login redirects.
+
+core/urls.py
+Maps browser URLs to view functions. This is where patient, doctor, secretary,
+admin, API, appointment, and profile routes are registered.
+
+clinic/
+The main application folder containing the business logic.
+
+clinic/models.py
+Defines the database models: Service, Profile, PatientProfileAudit, and
+Appointment.
+
+clinic/views.py
+Contains the system behavior: login, registration, dashboards, appointment
+booking, session management, profile updates, patient search, quick
+registration, doctor notes, sales reports, and API endpoints.
+
+clinic/templates/clinic/
+Contains the HTML templates for each page, including dashboards, booking pages,
+ session pages, profile pages, patient details, login, registration, and shared
+base layouts.
+
+clinic/tests.py
+Contains automated tests for role access, booking restrictions, staff and
+patient flows, search, dashboard access, doctor notes, and model table names.
+
+static/
+Contains static assets such as the favicon, logo, and website images.
+
+requirements.txt
+Lists Python packages needed by the project.
+
+Procfile
+Tells Render how to start the web application.
+
+.env.example
+Documents the environment variables needed for local or production setup.
+
+
+4. Main Database Models
+
+Service
+Stores the clinic treatment catalog. Each service has a name, category,
+description, price, and optional uploaded image. Categories include facial
+treatments, ZO professional facials, doctor procedures, laser gynecology, and
+add-on treatments.
+
+Profile
+Extends Django's built-in User model. It stores the user's role, phone number,
+profile image, doctor ID, or employee ID. It automatically generates display IDs
+such as #SA-0001 for patients, DOC-0001 for doctors, and EMP-0001 for
+secretaries.
+
+PatientProfileAudit
+Records important profile changes, especially username and email changes. This
+helps with accountability and tracking.
+
+Appointment
+Stores appointments and treatment sessions. Each appointment belongs to a
+patient and service, can include an add-on service, stores date, time, notes,
+status, clinic location, specialist, reference number, booking price, and doctor
+notes. Status values are Pending, Confirmed, Completed, and Cancelled.
+
+
+5. User Roles
+
+Patient
+Patients can register, log in, view their dashboard, book appointments, view
+their treatment history, cancel eligible appointments, and update their profile
+and password.
+
+Secretary
+Secretaries can access a staff dashboard, manually register patients, schedule
+appointments for patients, search patients, view patient information, confirm
+appointments, complete appointments, cancel appointments, and monitor clinic
+sessions.
+
+Doctor
+Doctors can access everything needed for clinical management: dashboard,
+session management, patient details, doctor notes, sales reports, and user role
+management. Doctors can also confirm, complete, or cancel appointments.
+
+Admin/Superuser
+The Django admin site manages services, appointments, profiles, and uploaded
+images. Jazzmin is used to make the admin interface cleaner and branded.
+
+
+6. How the Appointment Flow Works
+
+Patient booking flow:
+1. A patient logs in or registers.
+2. The patient opens the booking page.
+3. The patient selects a service, optional add-on, date, time, and notes.
+4. The system validates the appointment date and time.
+5. Sundays are blocked as rest days.
+6. Appointments must be booked at least one hour ahead.
+7. The system checks if the patient already booked the same slot.
+8. If valid, the appointment is created with Pending status.
+9. A unique TRN reference number is generated.
+
+Staff scheduling flow:
+1. A secretary or doctor opens the staff schedule appointment page.
+2. Staff can search for an existing patient or quickly register a new patient.
+3. Staff selects the service, add-on, date, time, and notes.
+4. The same booking validations are applied.
+5. The appointment is created and the staff member is redirected to manage
+sessions.
+
+Appointment status lifecycle:
+Pending means the appointment has been requested or created but not confirmed.
+Confirmed means staff has confirmed the appointment.
+Completed means the treatment session has already happened.
+Cancelled means the appointment was cancelled and the slot is released.
+
+
+7. Main Features
+
+Public homepage:
+The homepage introduces Shields Aesthetics and shows service categories. The
+"Set Appointment" button changes depending on the user. Guests go to the
+contact section, patients go to patient booking, and staff go to the staff
+scheduler.
+
+Authentication:
+Users can register, log in, and log out. After login, users are redirected based
+on role: patient dashboard, secretary dashboard, or doctor dashboard.
+
+Patient dashboard:
+Shows the patient's completed sessions count, upcoming appointment, and recent
+appointment activity.
+
+Patient booking:
+Patients can select services, choose dates and time slots, add notes, and submit
+appointments.
+
+Patient sessions:
+Patients can view treatment history, search sessions, see status badges, and
+cancel appointments when allowed.
+
+Profile management:
+Users can update their name, username, email, phone number, profile image, and
+password. After a successful update, the profile page refreshes so the newest
+details appear immediately.
+
+Secretary dashboard:
+Shows clinic activity such as total appointments, pending work, today's
+appointments, weekly totals, completed sessions, and upcoming appointments.
+
+Doctor dashboard:
+Shows appointment summaries, upcoming schedules, today and tomorrow's patients,
+and clinic work indicators.
+
+Manage sessions:
+Doctors and secretaries can filter sessions by status, search by patient,
+service, TRN, or patient ID, and filter by date. They can confirm, complete, or
+cancel appointments using confirmation popups that work on desktop and mobile.
+
+Patient details:
+Doctors and secretaries can view patient contact information, appointment
+summary, upcoming appointments, and appointment history.
+
+Doctor notes:
+Doctors can open patient details from session management and save private
+clinical notes for an appointment.
+
+Sales report:
+Doctors can view completed appointment revenue, daily sales, weekly sales,
+monthly sales, completed session counts, service breakdown, top treatments, and
+trend data.
+
+User management:
+Doctors can view user profiles, filter by role, search users, and change roles
+between Patient, Secretary, and Doctor.
+
+Notifications:
+Staff pages receive notification counts for pending future appointments. This
+helps staff notice new appointment requests.
+
+Responsive mobile design:
+The system includes mobile layout fixes for booking pages, profile forms,
+tables, search bars, modals, and session action confirmation popups.
+
+
+8. Validation and Business Rules
+
+Phone numbers:
+Philippine mobile numbers must follow the format 09XXXXXXXXX.
+
+Duplicate patient protection:
+The system checks for repeated patient names combined with matching contact
+details. It also prevents duplicate email or phone conflicts for patients.
+
+Appointment availability:
+Cancelled appointments do not block future availability. Pending and Confirmed
+appointments block the selected date and time.
+
+Sunday restriction:
+Sundays are treated as rest days and cannot be booked.
+
+Lead time:
+Appointments must be booked at least one hour in advance.
+
+Completed sessions:
+Session counters are based on completed appointments. This means the displayed
+"completed sessions" number represents treatments that were actually finished.
+
+
+9. Security and Access Control
+
+Role-based access:
+Each major view checks the current user's role before allowing access. Patients
+cannot access doctor or secretary dashboards. Secretaries cannot access
+doctor-only pages such as sales and user management.
+
+CSRF protection:
+Django CSRF protection is used for forms and POST actions.
+
+No-cache protected pages:
+The NoStoreAuthenticatedMiddleware adds no-cache headers to protected pages so
+browser history does not show private pages after logout.
+
+Secure production settings:
+The project supports secure cookies, HTTPS redirect, HSTS, trusted CSRF origins,
+and allowed hosts through environment variables.
+
+Password security:
+Django's built-in password validators and PasswordChangeForm are used for
+account security.
+
+
+10. APIs Used by the Frontend
+
+/check-availability/
+Returns unavailable time slots for a selected date.
+
+/api/search-patients/
+Lets staff search patients by name, email, username, phone, or patient ID.
+
+/api/quick-register-patient/
+Lets staff quickly create a patient account and receive temporary credentials.
+
+/api/service/<service_id>/
+Returns service details such as category, price, description, image, and
+estimated duration.
+
+/api/patient/<patient_id>/
+Returns patient details for staff popups.
+
+/api/doctor-notes/<appointment_id>/get/
+Returns doctor notes for a selected appointment.
+
+/api/doctor-notes/<appointment_id>/save/
+Saves private doctor notes.
+
+/api/notifications/poll/
+Returns pending appointment notification data for staff.
+
+
+11. Deployment Notes
+
+The project is designed for Render deployment. The Procfile runs migrations
+before starting Gunicorn. Environment variables control secrets, database
+connection, allowed hosts, CSRF trusted origins, debug mode, and security
+settings.
+
+Uploaded media such as profile photos and service images should use persistent
+storage in production. The README recommends setting MEDIA_ROOT to a persistent
+Render disk, for example /var/data/media, so uploaded images are not lost after
+redeploys or restarts.
+
+
+12. Testing
+
+The project includes Django tests that verify:
+Role-based access control.
+No-cache behavior after logout.
+Legacy staff scheduling URLs redirect correctly.
+Staff search works with TRN and patient IDs.
+Booking rejects Sundays and appointments less than one hour away.
+Quick patient registration returns temporary credentials.
+Patient booking and dashboard flow works.
+Homepage appointment links change by role.
+Secretary dashboard and manual registration flow works.
+Doctor detail, notes, sales, and user management pages work.
+Database model table names are readable and consistent.
+
+
+13. Presentation Summary
+
+In simple terms, Shields Aesthetics is a role-based clinic management website.
+Patients use it to book and track appointments. Secretaries use it to schedule
+and manage patient sessions. Doctors use it to review patient details, manage
+treatment sessions, write notes, view sales, and control user roles. The system
+uses Django, PostgreSQL, Django templates, JavaScript, and Render deployment to
+provide a complete appointment workflow from booking to confirmation,
+completion, cancellation, and reporting.
