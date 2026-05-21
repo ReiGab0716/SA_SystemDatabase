@@ -10,7 +10,7 @@
             </div>
             <div class="counter-group">
                 <div class="session-counter" id="result-counter">
-                    {{ total_visits }} session{{ total_visits|pluralize }}
+                    {{ total_visits }} confirmed session{{ total_visits|pluralize }}
                 </div>
             </div>
         </div>
@@ -189,7 +189,7 @@ document.addEventListener('input', function (e) {
 
         // Update the counter dynamically
         if (query === "") {
-            counter.innerText = `${totalCount} session${totalCount !== 1 ? 's' : ''}`;
+            counter.innerText = `{{ total_visits }} confirmed session{{ total_visits|pluralize }}`;
             counter.style.background = "#fff0f7"; // Original pink
         } else {
             counter.innerText = `Showing ${visibleCount} of ${totalCount}`;
@@ -206,6 +206,11 @@ document.addEventListener('keydown', function(e) {
 });
 
 let currentSessionId = null;
+
+const cancelModal = document.getElementById('cancelModal');
+if (cancelModal && cancelModal.parentElement !== document.body) {
+    document.body.appendChild(cancelModal);
+}
 
 function openCancelModal(sessionId) {
     currentSessionId = sessionId;

@@ -22,3 +22,12 @@ Fix the staff Schedule Appointment page used by secretary and doctor accounts so
 - [x] Apply the modal fix to secretary, doctor, and patient session pages.
 - [x] Re-run Django checks/tests.
 - [x] Commit and push the modal fix.
+
+## Follow-up Session Actions, Counts, and Profile Refresh
+- [x] Mount confirm, complete, and cancel confirmation modals outside the scrollable table area on mobile.
+- [x] Refresh the profile page automatically after successful profile or password updates.
+- [x] Count only completed appointments for doctor and secretary session counters, matching patient behavior.
+- [x] Rename patient, secretary, and doctor session counters to "confirmed sessions".
+- [x] Remove the "Patient Photo" label from doctor and secretary patient detail popups.
+- [x] Re-run Django checks/tests.
+- [x] Commit and push the update to GitHub for Render deployment.

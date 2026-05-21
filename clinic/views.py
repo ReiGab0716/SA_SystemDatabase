@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.conf import settings
 from django.db import IntegrityError
 from django.db.models import Q, Sum, Count
-from django.http import JsonResponse, HttpResponseForbidden
+from django.http import JsonResponse, HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
@@ -55,6 +55,14 @@ def count_unique_trns(queryset):
     referenced = queryset.exclude(reference_number__isnull=True).exclude(reference_number="")
     missing_reference = queryset.filter(Q(reference_number__isnull=True) | Q(reference_number=""))
     return referenced.values("reference_number").distinct().count() + missing_reference.values("id").distinct().count()
+
+
+def profile_refresh_response(request):
+    if request.headers.get("HX-Request"):
+        response = HttpResponse(status=204)
+        response["HX-Redirect"] = reverse("patient_profile")
+        return response
+    return redirect("patient_profile")
 
 
 def parse_booking_datetime(appointment_date, appointment_time):
@@ -412,12 +420,14 @@ def patient_profile(request):
                         new_value=user.email,
                     )
                 messages.success(request, "Profile updated successfully!")
+                return profile_refresh_response(request)
         elif 'change_password' in request.POST:
             password_form = PasswordChangeForm(user, request.POST)
             if password_form.is_valid():
                 user = password_form.save()
                 update_session_auth_hash(request, user)
                 messages.success(request, "Password updated successfully!")
+                return profile_refresh_response(request)
 
     context = {
         'base_template': "clinic/base_partial.html" if request.headers.get('HX-Request') else base_template,
@@ -543,6 +553,8 @@ def doctor_manage_sessions(request):
     min_date = today
     max_date = today + timedelta(days=365)
 
+    completed_sessions = Appointment.objects.filter(status="Completed")
+
     return render(request, "clinic/doctor_manage_sessions.html", {
         "sessions": sessions,
         "status": status,
@@ -550,8 +562,8 @@ def doctor_manage_sessions(request):
         "selected_date": selected_date,
         "min_date": min_date.isoformat(),
         "max_date": max_date.isoformat(),
-        "total_sessions": count_unique_trns(sessions),
-        "total_visits": count_unique_trns(sessions)
+        "total_sessions": count_unique_trns(completed_sessions),
+        "total_visits": count_unique_trns(completed_sessions)
     })
 
 @login_required
@@ -785,6 +797,8 @@ def secretary_manage_sessions(request):
     min_date = today
     max_date = today + timedelta(days=365)
 
+    completed_sessions = Appointment.objects.filter(status="Completed")
+
     return render(request, "clinic/secretary_manage_sessions.html", {
         "sessions": sessions,
         "status": status,
@@ -792,8 +806,8 @@ def secretary_manage_sessions(request):
         "selected_date": selected_date,
         "min_date": min_date.isoformat(),
         "max_date": max_date.isoformat(),
-        "total_visits": count_unique_trns(sessions),
-        "total_sessions": count_unique_trns(sessions)
+        "total_visits": count_unique_trns(completed_sessions),
+        "total_sessions": count_unique_trns(completed_sessions)
     })
     
 @login_required
